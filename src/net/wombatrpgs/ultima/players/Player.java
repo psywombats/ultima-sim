@@ -17,6 +17,8 @@ public abstract class Player {
 	protected Simulation simulation;
 	protected boolean isDoctorProtected;
 	protected boolean alive;
+	protected boolean nullified;
+	protected boolean deceitActive;
 	
 	/**
 	 * Creates a new player.
@@ -33,6 +35,18 @@ public abstract class Player {
 	
 	/** @return True if this player is still alive */
 	public boolean isAlive() { return alive; }
+	
+	/** @return True if this player can't act this night */
+	public boolean isNullified() { return nullified; }
+	
+	/** @retrun True if deceit is active on this player */
+	public boolean isDeceitActive() { return deceitActive; }
+	
+	/** Cancels this player's ability for the night. */
+	public void nullify() { nullified = true; }
+	
+	/** @param active True to active seer misidentification */
+	public void activateDeceit(boolean active) { deceitActive = active; }
 	
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
@@ -73,6 +87,16 @@ public abstract class Player {
 	 */
 	public void onDawn() {
 		isDoctorProtected = false;
+		if (nullified) {
+			nullified = false;
+		}
+	}
+	
+	/**
+	 * Called at the very startingest start of night.
+	 */
+	public void onPostDaykill() {
+		// nothing by default
 	}
 	
 	/**

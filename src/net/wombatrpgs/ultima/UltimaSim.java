@@ -30,11 +30,12 @@ public class UltimaSim {
 		List<SimulationResult> results = new ArrayList<SimulationResult>();
 		
 		GameRules rules = new GameRules();
-		rules.playerCount = 12;
+		rules.playerCount = 15;
 		rules.mafiaCount = 2;
 		rules.enabledRoles.put(SpecialRole.SEER, true);
 		rules.enabledRoles.put(SpecialRole.DOCTOR, true);
 		rules.enabledRoles.put(SpecialRole.ASSASSIN, true);
+		rules.enabledRoles.put(SpecialRole.BLACK_MAGE, true);
 		
 		for (int i = 0; i < iterations; i += 1) {
 			Simulation simulation = new Simulation(rules);

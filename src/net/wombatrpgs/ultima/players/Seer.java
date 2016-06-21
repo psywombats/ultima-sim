@@ -19,6 +19,7 @@ public class Seer extends TownPlayer {
 	private static final float INVESTIGATION_PERCENT_BEFORE_CLAIM = 0.5f;
 	
 	private ArrayList<Player> investigatedPlayers;
+	private ArrayList<Player> misidentifiedPlayers;
 	
 	/**
 	 * Inherited constructor.
@@ -27,6 +28,7 @@ public class Seer extends TownPlayer {
 	public Seer(Simulation simulation) {
 		super(simulation);
 		investigatedPlayers = new ArrayList<Player>();
+		misidentifiedPlayers = new ArrayList<Player>();
 		investigatedPlayers.add(this);
 	}
 
@@ -63,8 +65,13 @@ public class Seer extends TownPlayer {
 			
 			// we found scum! let everyone know! (...scum will probs kill us)
 			if (player.getFaction() == Faction.MAFIA) {
-				simulation.prioritizeDaykill(player);
-				simulation.prioritizeNightkill(this);
+				if (!player.deceitActive) {
+					simulation.prioritizeDaykill(player);
+					simulation.prioritizeNightkill(this);
+				} else {
+					// whoops this is gonna cost big if seer ever roleclaims
+					misidentifiedPlayers.add(player);
+				}
 			}
 		}
 		
@@ -82,7 +89,11 @@ public class Seer extends TownPlayer {
 			simulation.prioritizeNightkill(this);
 			for (Player player : investigatedPlayers) {
 				if (player.getFaction() == Faction.MAFIA) {
-					simulation.prioritizeDaykill(player);
+					if (misidentifiedPlayers.contains(player)) {
+						simulation.exoneratePlayer(player);
+					} else {
+						simulation.prioritizeDaykill(player);
+					}
 				} else {
 					simulation.exoneratePlayer(player);
 				}

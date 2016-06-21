@@ -77,6 +77,9 @@ public class Simulation {
 			if (rules.enabledRoles.get(SpecialRole.ASSASSIN) && !isAlive(SpecialRole.ASSASSIN)) {
 				mafioso = new Assassin(this);
 				specialists.put(SpecialRole.ASSASSIN, mafioso);
+			} else if (rules.enabledRoles.get(SpecialRole.BLACK_MAGE) && !isAlive(SpecialRole.BLACK_MAGE)) {
+				mafioso = new BlackMage(this);
+				specialists.put(SpecialRole.BLACK_MAGE, mafioso);
 			} else {
 				mafioso = new MafiaPlayer(this);
 			}
@@ -209,10 +212,18 @@ public class Simulation {
 			return result;
 		}
 		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
+			if (!player.isNullified()) {
+				player.onPostDaykill();
+			}
+		}
 		
 		iteratingPlayers = new ArrayList<Player>(players);
 		for (Player player : iteratingPlayers) {
-			player.onPreNightkill();
+			if (!player.isNullified()) {
+				player.onPreNightkill();
+			}
 		}
 		
 		Player nightkillTarget = getNightkillTarget();
@@ -238,20 +249,28 @@ public class Simulation {
 		}
 		
 		HashSet<Player> validTargets = new HashSet<Player>(players);
-		validTargets.remove(exoneratedPlayers);
-		return randomIn(validTargets);
+		validTargets.removeAll(exoneratedPlayers);
+		if (validTargets.size() > 0) {
+			return randomIn(validTargets);
+		}
+		
+		return randomIn(players);
 	}
 	
 	/** @return The poor slob that mafia chooses to nightkill */
 	private Player getNightkillTarget() {
 		if (prioritizedNightkillPlayers.size() > 0) {
-			if (prioritizedNightkillPlayers.size() > 1 || !isAlive(SpecialRole.DOCTOR)) {
+			if (prioritizedNightkillPlayers.size() > 1 || !isAlive(SpecialRole.DOCTOR) || specialists.get(SpecialRole.DOCTOR).isNullified()) {
 				return randomIn(prioritizedNightkillPlayers);
 			}
 		}
-		if (exoneratedPlayers.size() > 0) {
-			return randomIn(exoneratedPlayers);
+		
+		HashSet<Player> exoneratedTargets = new HashSet<Player>(exoneratedPlayers);
+		exoneratedTargets.removeAll(mafia);
+		if (exoneratedTargets.size() > 0) {
+			return randomIn(exoneratedTargets);
 		}
+		
 		return randomIn(town);
 	}
 	

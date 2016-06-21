@@ -20,14 +20,4 @@ public class MafiaPlayer extends Player {
 	public MafiaPlayer(Simulation simulation) {
 		super(simulation, Faction.MAFIA);
 	}
-
-	/**
-	 * @see net.wombatrpgs.ultima.players.Player#protect()
-	 */
-	@Override
-	public void protect() {
-		// TODO Auto-generated method stub
-		super.protect();
-	}
-
 }
