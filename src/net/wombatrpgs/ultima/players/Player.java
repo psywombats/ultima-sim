@@ -26,6 +26,9 @@ public abstract class Player {
 		this.faction = faction;
 	}
 	
+	/** @return The faction of this player */
+	public Faction getFaction() { return faction; }
+	
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
@@ -40,6 +43,13 @@ public abstract class Player {
 	 */
 	public void attemptNightkill() {
 		die();
+	}
+	
+	/**
+	 * Called after a nightkill has been performed.
+	 */
+	public void onPostNightkill() {
+		// nothing by default
 	}
 	
 	/**

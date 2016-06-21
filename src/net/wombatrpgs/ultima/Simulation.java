@@ -7,13 +7,12 @@
 package net.wombatrpgs.ultima;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
-import net.wombatrpgs.ultima.players.Faction;
-import net.wombatrpgs.ultima.players.MafiaPlayer;
-import net.wombatrpgs.ultima.players.Player;
-import net.wombatrpgs.ultima.players.TownPlayer;
+import net.wombatrpgs.ultima.players.*;
 import net.wombatrpgs.ultima.rules.GameRules;
 
 /**
@@ -26,8 +25,11 @@ public class Simulation {
 	private ArrayList<Player> players;
 	private ArrayList<MafiaPlayer> mafia;
 	private ArrayList<TownPlayer> town;
+	private Map<SpecialRole, Player> specialists;
 	
-	private GameRules rules;
+	private List<Player> prioritizedNightkillPlayers;
+	private List<Player> prioritizedDaykillPlayers;
+	
 	private int turnCount;
 	
 	/**
@@ -35,15 +37,24 @@ public class Simulation {
 	 * @param	rules			The rules setup
 	 */
 	public Simulation(GameRules rules) {
-		this.rules = rules;
 		players = new ArrayList<Player>();
 		mafia = new ArrayList<MafiaPlayer>();
 		town = new ArrayList<TownPlayer>();
+		specialists = new HashMap<SpecialRole, Player>();
+		
+		prioritizedNightkillPlayers = new ArrayList<>();
+		prioritizedDaykillPlayers = new ArrayList<>();
 		
 		turnCount = 0;
 		
 		for (int i = 0; i < rules.playerCount - rules.mafiaCount; i += 1) {
-			TownPlayer townie = new TownPlayer(this);
+			TownPlayer townie;
+			if (rules.enabledRoles.get(SpecialRole.SEER) && specialists.get(SpecialRole.SEER) == null) {
+				townie = new Seer(this);
+				specialists.put(SpecialRole.SEER, townie);
+			} else {
+				townie = new TownPlayer(this);
+			}
 			players.add(townie);
 			town.add(townie);
 		}
@@ -54,6 +65,21 @@ public class Simulation {
 			players.add(mafioso);
 		}
 	}
+	
+	/** @return All players in the game */
+	public List<Player> getPlayers() { return players; }
+	
+	/** @return All mafia in the game */
+	public List<MafiaPlayer> getMafia() { return mafia; }
+	
+	/** @return All mafia in the game */
+	public List<TownPlayer> getTown() { return town; }
+	
+	/** @return Brings a townie to the prioritized mafia hitlist */
+	public void prioritizeNightkill(Player player) { prioritizedNightkillPlayers.add(player); }
+	
+	/** @return Brings a mafioso to the prioritized town lynchlist */
+	public void prioritizeDaykill(Player player) { prioritizedDaykillPlayers.add(player); }
 	
 	/**
 	 * Simulates the full run of the game.
@@ -72,9 +98,21 @@ public class Simulation {
 	 * @param	player			The player that died
 	 */
 	public void onPlayerDeath(Player player) {
+		if (!players.contains(player)) {
+			System.err.println("Player is dead: " + player);
+		}
+		
 		players.remove(player);
 		if (mafia.contains(player)) mafia.remove(player);
 		if (town.contains(player)) town.remove(player);
+		if (prioritizedDaykillPlayers.contains(player)) prioritizedDaykillPlayers.remove(player);
+		if (prioritizedNightkillPlayers.contains(player)) prioritizedNightkillPlayers.remove(player);
+		
+		for (SpecialRole role : SpecialRole.values()) {
+			if (specialists.get(role) == player) {
+				specialists.put(role, null);
+			}
+		}
 	}
 	
 	/**
@@ -98,18 +136,30 @@ public class Simulation {
 			return result;
 		}
 		
+		for (Player player : players) {
+			player.onPostNightkill();
+		}
+		
 		turnCount += 1;
 		return null;
 	}
 	
 	/**@return The player that town chooses to daykill next */
 	private Player getDaykillTarget() {
-		return randomIn(players);
+		if (prioritizedDaykillPlayers.size() > 0) {
+			return randomIn(prioritizedDaykillPlayers);
+		} else {
+			return randomIn(players);
+		}
 	}
 	
 	/** @return The poor slob that mafia chooses to nightkill */
 	private Player getNightkillTarget() {
-		return randomIn(town);
+		if (prioritizedNightkillPlayers.size() > 0) {
+			return randomIn(prioritizedNightkillPlayers);
+		} else {
+			return randomIn(town);
+		}
 	}
 	
 	/**
@@ -134,7 +184,7 @@ public class Simulation {
 	 * @param	collection		The collection to select from
 	 * @return					A random element from the list or null if empty
 	 */
-	private static <T> T randomIn(List<T> collection) {
+	public static <T> T randomIn(List<T> collection) {
 		if (collection.size() == 0) {
 			return null;
 		} else if (collection.size() == 1) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.wombatrpgs.ultima.players.Faction;
+import net.wombatrpgs.ultima.players.SpecialRole;
 import net.wombatrpgs.ultima.rules.GameRules;
 
 /**
@@ -31,6 +32,7 @@ public class UltimaSim {
 		GameRules rules = new GameRules();
 		rules.playerCount = 15;
 		rules.mafiaCount = 2;
+		rules.enabledRoles.put(SpecialRole.SEER, true);
 		
 		for (int i = 0; i < iterations; i += 1) {
 			Simulation simulation = new Simulation(rules);
