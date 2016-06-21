@@ -32,6 +32,7 @@ public class Simulation {
 	private Set<Player> prioritizedNightkillPlayers;
 	private Set<Player> prioritizedDaykillPlayers;
 	private Set<Player> exoneratedPlayers;
+	private Set<Player> onceProtectedPlayers;
 	
 	private GameRules rules;
 	private int turnCount;
@@ -50,8 +51,11 @@ public class Simulation {
 		prioritizedNightkillPlayers = new HashSet<Player>();
 		prioritizedDaykillPlayers = new HashSet<Player>();
 		exoneratedPlayers = new HashSet<Player>();
+		onceProtectedPlayers = new HashSet<Player>();
 		
 		turnCount = 0;
+		
+		// jank as hell role initiation
 		
 		for (int i = 0; i < rules.playerCount - rules.mafiaCount; i += 1) {
 			TownPlayer townie;
@@ -69,7 +73,13 @@ public class Simulation {
 		}
 		
 		for (int i = 0; i < rules.mafiaCount; i += 1) {
-			MafiaPlayer mafioso = new MafiaPlayer(this);
+			MafiaPlayer mafioso;
+			if (rules.enabledRoles.get(SpecialRole.ASSASSIN) && !isAlive(SpecialRole.ASSASSIN)) {
+				mafioso = new Assassin(this);
+				specialists.put(SpecialRole.ASSASSIN, mafioso);
+			} else {
+				mafioso = new MafiaPlayer(this);
+			}
 			mafia.add(mafioso);
 			players.add(mafioso);
 		}
@@ -105,14 +115,8 @@ public class Simulation {
 	/** @return All players prioritized for daykilling */
 	public Set<Player>getPrioritizedDaykills() { return prioritizedDaykillPlayers; }
 	
-	/**
-	 * Marks a player as clearly innocent to town.
-	 * @param	player			The player to prevent daykills for
-	 */
-	public void exoneratePlayer(Player player) {
-		exoneratedPlayers.add(player);
-		prioritizedDaykillPlayers.remove(player);
-	}
+	/** @return All players that have at one point been affected by the doctor */
+	public Set<Player>getOnceProtected() { return onceProtectedPlayers; }
 	
 	/**
 	 * Simulates the full run of the game.
@@ -141,12 +145,39 @@ public class Simulation {
 		if (prioritizedDaykillPlayers.contains(player)) prioritizedDaykillPlayers.remove(player);
 		if (prioritizedNightkillPlayers.contains(player)) prioritizedNightkillPlayers.remove(player);
 		if (exoneratedPlayers.contains(player)) exoneratedPlayers.remove(player);
+		if (onceProtectedPlayers.contains(player)) onceProtectedPlayers.remove(player);
 		
 		for (SpecialRole role : SpecialRole.values()) {
 			if (specialists.get(role) == player) {
 				specialists.put(role, null);
 			}
 		}
+	}
+	
+	/**
+	 * Call this when a doctor miraculously saves a player.
+	 * @param	player			The player that didn't quite die
+	 */
+	public void onPlayerProtected(Player player) {
+		onceProtectedPlayers.add(player);
+	}
+	
+	/**
+	 * Marks a specialist as having exhausted their role, no longer treated by the logic of the
+	 * other specialists as having that role.
+	 * @param	role			The role to deregister
+	 */
+	public void deregisterSpecial(SpecialRole role) {
+		specialists.put(role, null);
+	}
+	
+	/**
+	 * Marks a player as clearly innocent to town.
+	 * @param	player			The player to prevent daykills for
+	 */
+	public void exoneratePlayer(Player player) {
+		exoneratedPlayers.add(player);
+		prioritizedDaykillPlayers.remove(player);
 	}
 	
 	/**
@@ -164,8 +195,10 @@ public class Simulation {
 	 */
 	private SimulationResult simulateTurn() {
 		SimulationResult result;
+		List<Player> iteratingPlayers;
 		
-		for (Player player : players) {
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
 			player.onDawn();
 		}
 		
@@ -176,7 +209,9 @@ public class Simulation {
 			return result;
 		}
 		
-		for (Player player : players) {
+		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
 			player.onPreNightkill();
 		}
 		
@@ -187,7 +222,8 @@ public class Simulation {
 			return result;
 		}
 		
-		for (Player player : players) {
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
 			player.onPostNightkill();
 		}
 		

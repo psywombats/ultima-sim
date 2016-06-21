@@ -28,8 +28,10 @@ public class Doctor extends TownPlayer {
 	public void onPreNightkill() {
 		super.onPreNightkill();
 		
-		if (simulation.getPrioritizedDaykills().size() > 0) {
-			Simulation.randomIn(simulation.getPrioritizedDaykills()).protect();
+		// if someone's role-claimed, protect them
+		// otherwise, physician, heal thyself
+		if (simulation.getPrioritizedNightkills().size() > 0) {
+			Simulation.randomIn(simulation.getPrioritizedNightkills()).protect();
 		} else {
 			protect();
 		}

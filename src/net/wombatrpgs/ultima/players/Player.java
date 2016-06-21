@@ -49,7 +49,16 @@ public abstract class Player {
 	public void attemptNightkill() {
 		if (!isDoctorProtected) {
 			die();
+		} else {
+			simulation.onPlayerProtected(this);
 		}
+	}
+	
+	/**
+	 * Immediately kills this player, no questions asked.
+	 */
+	public void kill() {
+		die();
 	}
 	
 	/**
