@@ -12,7 +12,8 @@ package net.wombatrpgs.ultima.players;
 public enum Faction {
 	
 	TOWN		("town"),
-	MAFIA		("mafia");
+	MAFIA		("mafia"),
+	RNG			("the flip of a coin");
 	
 	private String displayName;
 	

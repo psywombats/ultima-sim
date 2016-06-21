@@ -14,6 +14,7 @@ import net.wombatrpgs.ultima.players.Faction;
 import net.wombatrpgs.ultima.players.MafiaPlayer;
 import net.wombatrpgs.ultima.players.Player;
 import net.wombatrpgs.ultima.players.TownPlayer;
+import net.wombatrpgs.ultima.rules.GameRules;
 
 /**
  * One game simulation.
@@ -26,27 +27,28 @@ public class Simulation {
 	private ArrayList<MafiaPlayer> mafia;
 	private ArrayList<TownPlayer> town;
 	
+	private GameRules rules;
 	private int turnCount;
 	
 	/**
 	 * Creates a game with the given number of players. Autoassigns roles.
-	 * @param	playerCount		The total number of players to create
-	 * @param	mafiaCount		The number of those players that are scum
+	 * @param	rules			The rules setup
 	 */
-	public Simulation(int playerCount, int mafiaCount) {
+	public Simulation(GameRules rules) {
+		this.rules = rules;
 		players = new ArrayList<Player>();
 		mafia = new ArrayList<MafiaPlayer>();
 		town = new ArrayList<TownPlayer>();
 		
 		turnCount = 0;
 		
-		for (int i = 0; i < playerCount - mafiaCount; i += 1) {
+		for (int i = 0; i < rules.playerCount - rules.mafiaCount; i += 1) {
 			TownPlayer townie = new TownPlayer(this);
 			players.add(townie);
 			town.add(townie);
 		}
 		
-		for (int i = 0; i < mafiaCount; i += 1) {
+		for (int i = 0; i < rules.mafiaCount; i += 1) {
 			MafiaPlayer mafioso = new MafiaPlayer(this);
 			mafia.add(mafioso);
 			players.add(mafioso);
@@ -120,6 +122,8 @@ public class Simulation {
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
 		} else if (mafia.size() == 0) {
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
+		} else if (mafia.size() == town.size() && isNight) {
+			return new SimulationResult(Faction.RNG, turnCount, true);
 		} else {
 			return null;
 		}

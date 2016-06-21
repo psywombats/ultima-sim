@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.wombatrpgs.ultima.players.Faction;
+import net.wombatrpgs.ultima.rules.GameRules;
 
 /**
  * Entry point.
@@ -19,8 +20,6 @@ import net.wombatrpgs.ultima.players.Faction;
 public class UltimaSim {
 	
 	private static int iterations = 10000;
-	private static int playerCount = 10;
-	private static int mafiaCount = 2;
 
 	/**
 	 * Entry point.
@@ -29,8 +28,12 @@ public class UltimaSim {
 	public static void main(String[] args) {
 		List<SimulationResult> results = new ArrayList<SimulationResult>();
 		
+		GameRules rules = new GameRules();
+		rules.playerCount = 15;
+		rules.mafiaCount = 2;
+		
 		for (int i = 0; i < iterations; i += 1) {
-			Simulation simulation = new Simulation(playerCount, mafiaCount);
+			Simulation simulation = new Simulation(rules);
 			results.add(simulation.simulate());
 		}
 		
