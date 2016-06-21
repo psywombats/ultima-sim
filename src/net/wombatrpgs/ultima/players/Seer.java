@@ -16,6 +16,8 @@ import net.wombatrpgs.ultima.Simulation;
  */
 public class Seer extends TownPlayer {
 	
+	private static final float INVESTIGATION_PERCENT_TO_FLIP = 0.5f;
+	
 	private List<Player> investigatedPlayers;
 	
 	/**
@@ -25,6 +27,7 @@ public class Seer extends TownPlayer {
 	public Seer(Simulation simulation) {
 		super(simulation);
 		investigatedPlayers = new ArrayList<Player>();
+		investigatedPlayers.add(this);
 	}
 
 	/**
@@ -39,12 +42,19 @@ public class Seer extends TownPlayer {
 			}
 		}
 		
-		toInvestigate.remove(this);
-		
 		if (toInvestigate.size() > 0) {
 			Player player = Simulation.randomIn(toInvestigate);
 			investigatedPlayers.add(player);
+			toInvestigate.remove(player);
 			if (player.getFaction() == Faction.MAFIA) {
+				simulation.prioritizeDaykill(player);
+				simulation.prioritizeNightkill(this);
+			}
+		}
+		
+		float uninvestigated = (float)toInvestigate.size() / (float)simulation.getPlayers().size();
+		if (uninvestigated <= INVESTIGATION_PERCENT_TO_FLIP) {
+			for (Player player : toInvestigate) {
 				simulation.prioritizeDaykill(player);
 				simulation.prioritizeNightkill(this);
 			}

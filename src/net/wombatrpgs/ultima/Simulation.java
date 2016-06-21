@@ -8,9 +8,11 @@ package net.wombatrpgs.ultima;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import net.wombatrpgs.ultima.players.*;
 import net.wombatrpgs.ultima.rules.GameRules;
@@ -27,9 +29,10 @@ public class Simulation {
 	private ArrayList<TownPlayer> town;
 	private Map<SpecialRole, Player> specialists;
 	
-	private List<Player> prioritizedNightkillPlayers;
-	private List<Player> prioritizedDaykillPlayers;
+	private Set<Player> prioritizedNightkillPlayers;
+	private Set<Player> prioritizedDaykillPlayers;
 	
+	private GameRules rules;
 	private int turnCount;
 	
 	/**
@@ -37,13 +40,14 @@ public class Simulation {
 	 * @param	rules			The rules setup
 	 */
 	public Simulation(GameRules rules) {
+		this.rules = rules;
 		players = new ArrayList<Player>();
 		mafia = new ArrayList<MafiaPlayer>();
 		town = new ArrayList<TownPlayer>();
 		specialists = new HashMap<SpecialRole, Player>();
 		
-		prioritizedNightkillPlayers = new ArrayList<>();
-		prioritizedDaykillPlayers = new ArrayList<>();
+		prioritizedNightkillPlayers = new HashSet<Player>();
+		prioritizedDaykillPlayers = new HashSet<Player>();
 		
 		turnCount = 0;
 		
@@ -65,6 +69,9 @@ public class Simulation {
 			players.add(mafioso);
 		}
 	}
+	
+	/** @return The game rules */
+	public GameRules rules() { return rules; }
 	
 	/** @return All players in the game */
 	public List<Player> getPlayers() { return players; }
@@ -192,5 +199,14 @@ public class Simulation {
 		} else {
 			return collection.get(rand.nextInt(collection.size()));
 		}
+	}
+	
+	/**
+	 * Returns a random element of the list.
+	 * @param	collection		The collection to select from
+	 * @return					A random element from the list or null if empty
+	 */
+	public static <T> T randomIn(Set<T> collection) {
+		return randomIn(new ArrayList<T>(collection));
 	}
 }
