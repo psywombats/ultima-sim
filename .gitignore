@@ -1,0 +1,31 @@
+# Compiled source #
+###################
+*.class
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# MGNE logs etc #
+#################
+*.log
+*.sav
+*.kryo
+doc/*
+saga/savedata/*
+saga/*.cfg
+
+
+# MGN binaries #
+################
+saga/game.jar
+saga/res/jar/SagaSchema.jar
+saga/SaGa4.exe
+*.jgdb

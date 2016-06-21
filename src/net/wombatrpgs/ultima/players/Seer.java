@@ -7,7 +7,6 @@
 package net.wombatrpgs.ultima.players;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import net.wombatrpgs.ultima.Simulation;
 
@@ -16,9 +15,10 @@ import net.wombatrpgs.ultima.Simulation;
  */
 public class Seer extends TownPlayer {
 	
+	// when the seer has info on 50% of remaining players, they role claim
 	private static final float INVESTIGATION_PERCENT_TO_FLIP = 0.5f;
 	
-	private List<Player> investigatedPlayers;
+	private ArrayList<Player> investigatedPlayers;
 	
 	/**
 	 * Inherited constructor.
@@ -35,6 +35,17 @@ public class Seer extends TownPlayer {
 	 */
 	@Override public void onPostNightkill() {
 		super.onPostNightkill();
+		
+		ArrayList<Player> deadPlayers = new ArrayList<Player>();
+		for (Player player : investigatedPlayers) {
+			if (!player.isAlive()) {
+				deadPlayers.add(player);
+			}
+		}
+		for (Player deadPlayer : deadPlayers) {
+			investigatedPlayers.remove(deadPlayer);
+		}
+		
 		ArrayList<Player> toInvestigate = new ArrayList<Player>(simulation.getPlayers());
 		for (Player player : investigatedPlayers) {
 			if (toInvestigate.contains(player)) {
@@ -52,11 +63,23 @@ public class Seer extends TownPlayer {
 			}
 		}
 		
+		// if there's a safe doctor around, seer immediately role claims
+		// unfortunately haven't simulated a counter-claim but that's kinda a desperate ploy
+		float threshold = INVESTIGATION_PERCENT_TO_FLIP;
+		if (simulation.isAlive(SpecialRole.DOCTOR)) {
+			threshold = 0.0f;
+		}
+		
 		float uninvestigated = (float)toInvestigate.size() / (float)simulation.getPlayers().size();
-		if (uninvestigated <= INVESTIGATION_PERCENT_TO_FLIP) {
+		float investigated = 1.0f - uninvestigated;
+		if (investigated >= threshold) {
+			simulation.prioritizeNightkill(this);
 			for (Player player : toInvestigate) {
-				simulation.prioritizeDaykill(player);
-				simulation.prioritizeNightkill(this);
+				if (player.getFaction() == Faction.MAFIA) {
+					simulation.prioritizeDaykill(player);
+				} else {
+					simulation.exoneratePlayer(player);
+				}
 			}
 		}
 	}

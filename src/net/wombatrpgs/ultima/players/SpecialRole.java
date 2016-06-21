@@ -11,7 +11,8 @@ package net.wombatrpgs.ultima.players;
  */
 public enum SpecialRole {
 	
-	SEER			("seer");
+	SEER			("seer"),
+	DOCTOR			("doctor");
 	
 	private String displayName;
 	
