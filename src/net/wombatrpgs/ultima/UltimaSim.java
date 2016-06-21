@@ -1,0 +1,68 @@
+/**
+ *  UltimaSim.java
+ *  Created on Jun 20, 2016 8:21:58 PM for project ultima-sim
+ *  Author: psy_wombats
+ *  Contact: psy_wombats@wombatrpgs.net
+ */
+package net.wombatrpgs.ultima;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import net.wombatrpgs.ultima.players.Faction;
+
+/**
+ * Entry point.
+ */
+public class UltimaSim {
+	
+	private static int iterations = 10000;
+	private static int playerCount = 10;
+	private static int mafiaCount = 2;
+
+	/**
+	 * Entry point.
+	 * @param	args			unused for now
+	 */
+	public static void main(String[] args) {
+		List<SimulationResult> results = new ArrayList<SimulationResult>();
+		
+		for (int i = 0; i < iterations; i += 1) {
+			Simulation simulation = new Simulation(playerCount, mafiaCount);
+			results.add(simulation.simulate());
+		}
+		
+		int totalTurns = 0;
+		int totalNights = 0;
+		Map<Faction, Integer> wins = new HashMap<Faction, Integer>();
+		for (Faction faction : Faction.values()) {
+			wins.put(faction, 0);
+		}
+		
+		for (SimulationResult result : results) {
+			totalTurns += result.getTurnCount();
+			totalNights += result.endedOnNight() ? 1 : 0;
+			wins.put(result.getWinner(), wins.get(result.getWinner()) + 1);
+		}
+		
+		System.out.println("The game was won by:\n");
+		for (Faction faction : Faction.values()) {
+			String name = faction.getDisplayName();
+			float winPercent = (float)wins.get(faction) / (float)iterations;
+			String formattedPercent = String.format("%.1f", winPercent * 100.0f);
+			System.out.println(name + ": " + formattedPercent + "%");
+		}
+		System.out.println();
+		
+		float averageTurns = (float)totalTurns / (float)iterations;
+		String formattedTurns = String.format("%.1f", averageTurns + 1.0f);
+		System.out.println("The average game took " + formattedTurns + " days.");
+		
+		float nightPercent = (float)totalNights / (float)iterations;
+		String formattedNights = String.format("%.1f", nightPercent * 100.0f);
+		System.out.println("The game ended with a nightkill " + formattedNights + "% of the time.");
+	}
+
+}
