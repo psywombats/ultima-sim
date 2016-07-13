@@ -25,6 +25,9 @@ public class GameRules {
 	/** Is the special role enabled? */
 	public Map<SpecialRole, Boolean> enabledRoles;
 	
+	/** Is the vigilante sword in play? */
+	public boolean useSword;
+	
 	/**
 	 * Initializes an empty ruleset. Set via properties.
 	 */

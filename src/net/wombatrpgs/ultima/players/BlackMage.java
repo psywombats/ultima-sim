@@ -34,7 +34,10 @@ public class BlackMage extends MafiaPlayer {
 		super.onPostDaykill();
 		
 		// if doctor role is around and specials have been revealed, slow them
-		if (remainingSlows > 0 && simulation.isAlive(SpecialRole.DOCTOR) && simulation.getPrioritizedNightkills().size() > 0) {
+		if (remainingSlows > 0 &&
+				simulation.isAlive(SpecialRole.DOCTOR) &&
+				simulation.getPrioritizedNightkills().size() > 0 &&
+				!simulation.isAlive(SpecialRole.ASSASSIN)) {
 			slow(Simulation.randomIn(simulation.getPrioritizedNightkills()));
 			return;
 		}

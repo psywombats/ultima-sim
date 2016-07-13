@@ -16,9 +16,13 @@ public abstract class Player {
 	protected Faction faction;
 	protected Simulation simulation;
 	protected boolean isDoctorProtected;
-	protected boolean alive;
+	protected boolean alive = true;
 	protected boolean nullified;
 	protected boolean deceitActive;
+	protected boolean wounded;
+	protected boolean hasShield;
+	protected boolean dying;
+	protected boolean hasSword;
 	
 	/**
 	 * Creates a new player.
@@ -48,6 +52,21 @@ public abstract class Player {
 	/** @param active True to active seer misidentification */
 	public void activateDeceit(boolean active) { deceitActive = active; }
 	
+	/** @return True if this player is wearing a shield */
+	public boolean hasShield() { return hasShield; }
+	
+	/** Gives this player a shield */
+	public void grantShield() { hasShield = true; }
+	
+	/** @return True if this player is mortally wounded */
+	public boolean isWounded() { return wounded; }
+	
+	/** @return Checks if the hero has a sword */
+	public boolean hasSword() { return hasSword; }
+	
+	/** @param hasSword true to give, false to remove */
+	public void setSword(boolean hasSword) { this.hasSword = hasSword; }
+	
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
@@ -59,12 +78,17 @@ public abstract class Player {
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
+	 * @param	ignoresProtection	True to penetrate defenses
 	 */
-	public void attemptNightkill() {
-		if (!isDoctorProtected) {
-			die();
-		} else {
+	public void attemptNightkill(boolean ignoresProtection) {
+		if (isDoctorProtected && !ignoresProtection) {
 			simulation.onPlayerProtected(this);
+		} else if (hasShield && !ignoresProtection) {
+			hasShield = false;
+			wounded = true;
+			simulation.exoneratePlayer(this);
+		} else {
+			die();
 		}
 	}
 	
@@ -110,7 +134,15 @@ public abstract class Player {
 	 * Called each night after a nightkill has been performed.
 	 */
 	public void onPostNightkill() {
-		// nothing by default
+		if (dying) {
+			die();
+		}
+		if (wounded) {
+			dying = true;
+		}
+		if (hasSword()) {
+			useSword();
+		}
 	}
 	
 	/**
@@ -120,4 +152,9 @@ public abstract class Player {
 		alive = false;
 		simulation.onPlayerDeath(this);
 	}
+	
+	/**
+	 * Use the sword and pass it on.
+	 */
+	protected abstract void useSword();
 }

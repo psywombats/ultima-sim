@@ -20,4 +20,18 @@ public class MafiaPlayer extends Player {
 	public MafiaPlayer(Simulation simulation) {
 		super(simulation, Faction.MAFIA);
 	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#useSword()
+	 */
+	@Override protected void useSword() {
+		Player target = simulation.getNightkillTarget();
+		if (target != null) {
+			target.attemptNightkill(false);
+			setSword(false);
+			if (simulation.getTown().size() > 0) {
+				Simulation.randomIn(simulation.getTown()).setSword(true);
+			}
+		}
+	}
 }

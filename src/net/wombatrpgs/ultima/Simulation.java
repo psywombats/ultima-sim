@@ -36,6 +36,7 @@ public class Simulation {
 	
 	private GameRules rules;
 	private int turnCount;
+	private boolean enhancedNightkill;
 	
 	/**
 	 * Creates a game with the given number of players. Autoassigns roles.
@@ -65,6 +66,9 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.DOCTOR) && !isAlive(SpecialRole.DOCTOR)) {
 				townie = new Doctor(this);
 				specialists.put(SpecialRole.DOCTOR, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.SMITH) && !isAlive(SpecialRole.SMITH)) {
+				townie = new Smith(this);
+				specialists.put(SpecialRole.SMITH, townie);
 			} else {
 				townie = new TownPlayer(this);
 			}
@@ -80,11 +84,18 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.BLACK_MAGE) && !isAlive(SpecialRole.BLACK_MAGE)) {
 				mafioso = new BlackMage(this);
 				specialists.put(SpecialRole.BLACK_MAGE, mafioso);
+			} else if (rules.enabledRoles.get(SpecialRole.THIEF) && !isAlive(SpecialRole.THIEF)) {
+				mafioso = new Thief(this);
+				specialists.put(SpecialRole.THIEF, mafioso);
 			} else {
 				mafioso = new MafiaPlayer(this);
 			}
 			mafia.add(mafioso);
 			players.add(mafioso);
+		}
+		
+		if (rules.useSword) {
+			randomIn(town).setSword(true);
 		}
 	}
 	
@@ -120,6 +131,9 @@ public class Simulation {
 	
 	/** @return All players that have at one point been affected by the doctor */
 	public Set<Player>getOnceProtected() { return onceProtectedPlayers; }
+	
+	/** Sets assassination mode on */
+	public void enhanceNightkill() { this.enhancedNightkill = true; }
 	
 	/**
 	 * Simulates the full run of the game.
@@ -192,58 +206,8 @@ public class Simulation {
 		return specialists.get(role) != null;
 	}
 	
-	/**
-	 * Simulates one day. Returns the result, if any.
-	 * @return					The final result of the game if it resolved, else false
-	 */
-	private SimulationResult simulateTurn() {
-		SimulationResult result;
-		List<Player> iteratingPlayers;
-		
-		iteratingPlayers = new ArrayList<Player>(players);
-		for (Player player : iteratingPlayers) {
-			player.onDawn();
-		}
-		
-		Player daykillTarget = getDaykillTarget();
-		daykillTarget.attemptDaykill();
-		result = checkForResult(false);
-		if (result != null) {
-			return result;
-		}
-		
-		iteratingPlayers = new ArrayList<Player>(players);
-		for (Player player : iteratingPlayers) {
-			if (!player.isNullified()) {
-				player.onPostDaykill();
-			}
-		}
-		
-		iteratingPlayers = new ArrayList<Player>(players);
-		for (Player player : iteratingPlayers) {
-			if (!player.isNullified()) {
-				player.onPreNightkill();
-			}
-		}
-		
-		Player nightkillTarget = getNightkillTarget();
-		nightkillTarget.attemptNightkill();
-		result = checkForResult(true);
-		if (result != null) {
-			return result;
-		}
-		
-		iteratingPlayers = new ArrayList<Player>(players);
-		for (Player player : iteratingPlayers) {
-			player.onPostNightkill();
-		}
-		
-		turnCount += 1;
-		return null;
-	}
-	
 	/**@return The player that town chooses to daykill next */
-	private Player getDaykillTarget() {
+	public Player getDaykillTarget() {
 		if (prioritizedDaykillPlayers.size() > 0) {
 			return randomIn(prioritizedDaykillPlayers);
 		}
@@ -258,20 +222,38 @@ public class Simulation {
 	}
 	
 	/** @return The poor slob that mafia chooses to nightkill */
-	private Player getNightkillTarget() {
+	public Player getNightkillTarget() {
+		HashSet<Player> woundedPlayers = new HashSet<Player>();
+		for (Player player : town) {
+			if (player.isWounded()) {
+				woundedPlayers.add(player);
+			}
+		}
+		
+		prioritizedNightkillPlayers.removeAll(woundedPlayers);
 		if (prioritizedNightkillPlayers.size() > 0) {
-			if (prioritizedNightkillPlayers.size() > 1 || !isAlive(SpecialRole.DOCTOR) || specialists.get(SpecialRole.DOCTOR).isNullified()) {
-				return randomIn(prioritizedNightkillPlayers);
+			if (prioritizedNightkillPlayers.size() > 1 ||
+					!isAlive(SpecialRole.DOCTOR) ||
+					specialists.get(SpecialRole.DOCTOR).isNullified()  ||
+					!this.enhancedNightkill) {
+				Player target = randomIn(prioritizedNightkillPlayers);
+				if (!target.isWounded() && players.contains(target)) {
+					return target;
+				}
 			}
 		}
 		
 		HashSet<Player> exoneratedTargets = new HashSet<Player>(exoneratedPlayers);
 		exoneratedTargets.removeAll(mafia);
+		exoneratedTargets.removeAll(woundedPlayers);
 		if (exoneratedTargets.size() > 0) {
 			return randomIn(exoneratedTargets);
 		}
 		
-		return randomIn(town);
+		HashSet<Player> legalPlayers = new HashSet<Player>(town);
+		legalPlayers.removeAll(woundedPlayers);
+		
+		return randomIn(legalPlayers);
 	}
 	
 	/**
@@ -284,11 +266,81 @@ public class Simulation {
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
 		} else if (mafia.size() == 0) {
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
-		} else if (mafia.size() == town.size() && isNight) {
+		} else if (mafia.size() == 1 && town.size() == 1 && !isNight) {
+			return new SimulationResult(Faction.TRUE_RNG, turnCount, isNight);
+		} else if (mafia.size() == town.size() && !isNight) {
 			return new SimulationResult(Faction.RNG, turnCount, true);
 		} else {
 			return null;
 		}
+	}
+	
+	/**
+	 * Simulates one day. Returns the result, if any.
+	 * @return					The final result of the game if it resolved, else false
+	 */
+	private SimulationResult simulateTurn() {
+		SimulationResult result;
+		List<Player> iteratingPlayers;
+		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
+			player.onDawn();
+		}
+		
+		result = checkForResult(false);
+		if (result != null) {
+			return result;
+		}
+		
+		Player daykillTarget = getDaykillTarget();
+		daykillTarget.attemptDaykill();
+		result = checkForResult(true);
+		if (result != null) {
+			return result;
+		}
+		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
+			if (player.isAlive() && !player.isNullified()) {
+				player.onPostDaykill();
+			}
+		}
+		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
+			if (player.isAlive() && !player.isNullified()) {
+				player.onPreNightkill();
+			}
+		}
+		result = checkForResult(true);
+		if (result != null) {
+			return result;
+		}
+		
+		Player nightkillTarget = getNightkillTarget();
+		if (nightkillTarget != null) {
+			nightkillTarget.attemptNightkill(this.enhancedNightkill);
+		}
+		enhancedNightkill = false;
+		result = checkForResult(true);
+		if (result != null) {
+			return result;
+		}
+		
+		iteratingPlayers = new ArrayList<Player>(players);
+		for (Player player : iteratingPlayers) {
+			if (player.isAlive() && !player.isNullified()) {
+				player.onPostNightkill();
+			}
+		}
+		result = checkForResult(true);
+		if (result != null) {
+			return result;
+		}
+		
+		turnCount += 1;
+		return null;
 	}
 
 	/**

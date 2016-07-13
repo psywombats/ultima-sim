@@ -14,7 +14,7 @@ import net.wombatrpgs.ultima.Simulation;
 public class Assassin extends MafiaPlayer {
 	
 	// if there are only 2 more town that mafia, jump the gun for a good chance at winning
-	private static final int MAFIA_DELTA_BEFORE_CLAIM = 2;
+	private static final int MAFIA_DELTA_BEFORE_CLAIM = 1;
 
 	/**
 	 * Inherited constructor.
@@ -60,7 +60,8 @@ public class Assassin extends MafiaPlayer {
 	 * @param	victim			The victim to kill
 	 */
 	private void assassinate(Player victim) {
-		victim.kill();
+		// hack, skip a wounded victim
+		simulation.enhanceNightkill();
 		simulation.deregisterSpecial(SpecialRole.ASSASSIN);
 	}
 }

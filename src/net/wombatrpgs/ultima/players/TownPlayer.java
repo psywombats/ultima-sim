@@ -6,6 +6,8 @@
  */
 package net.wombatrpgs.ultima.players;
 
+import java.util.HashSet;
+
 import net.wombatrpgs.ultima.Simulation;
 
 /**
@@ -19,5 +21,21 @@ public class TownPlayer extends Player {
 	 */
 	public TownPlayer(Simulation simulation) {
 		super(simulation, Faction.TOWN);
+	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#useSword()
+	 */
+	@Override protected void useSword() {
+		Player target = simulation.getDaykillTarget();
+		if (target != null) {
+			target.attemptNightkill(false);
+			HashSet<Player> valid = new HashSet<Player>(simulation.getPlayers());
+			valid.remove(this);
+			setSword(false);
+			if (valid.size() > 0) {
+				Simulation.randomIn(valid).setSword(true);
+			}
+		}
 	}
 }

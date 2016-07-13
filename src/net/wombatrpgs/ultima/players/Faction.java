@@ -13,7 +13,8 @@ public enum Faction {
 	
 	TOWN		("town"),
 	MAFIA		("mafia"),
-	RNG			("the flip of a coin");
+	TRUE_RNG	("the flip of a coin"),
+	RNG			("mafia, provided their luck doesn't suck");
 	
 	private String displayName;
 	
