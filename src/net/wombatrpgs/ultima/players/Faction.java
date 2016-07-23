@@ -13,6 +13,7 @@ public enum Faction {
 	
 	TOWN		("town"),
 	MAFIA		("mafia"),
+	SK			("bad chef"),
 	TRUE_RNG	("the flip of a coin"),
 	RNG			("mafia, provided their luck doesn't suck");
 	

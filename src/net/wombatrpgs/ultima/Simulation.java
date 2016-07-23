@@ -24,9 +24,10 @@ public class Simulation {
 	
 	private static Random rand = new Random();
 	
-	private ArrayList<Player> players;
-	private ArrayList<MafiaPlayer> mafia;
-	private ArrayList<TownPlayer> town;
+	private Set<Player> players;
+	private Set<MafiaPlayer> mafia;
+	private Set<TownPlayer> town;
+	private Set<Player> serialKillers;
 	private Map<SpecialRole, Player> specialists;
 	
 	private Set<Player> prioritizedNightkillPlayers;
@@ -44,9 +45,10 @@ public class Simulation {
 	 */
 	public Simulation(GameRules rules) {
 		this.rules = rules;
-		players = new ArrayList<Player>();
-		mafia = new ArrayList<MafiaPlayer>();
-		town = new ArrayList<TownPlayer>();
+		players = new HashSet<Player>();
+		mafia = new HashSet<MafiaPlayer>();
+		town = new HashSet<TownPlayer>();
+		serialKillers = new HashSet<Player>();
 		specialists = new HashMap<SpecialRole, Player>();
 		
 		prioritizedNightkillPlayers = new HashSet<Player>();
@@ -94,6 +96,13 @@ public class Simulation {
 			players.add(mafioso);
 		}
 		
+		if (rules.enabledRoles.get(SpecialRole.SERIAL_KILLER)) {
+			Player killer = new SerialKiller(this);
+			specialists.put(SpecialRole.SERIAL_KILLER, killer);
+			players.add(killer);
+			serialKillers.add(killer);
+		}
+		
 		if (rules.useSword) {
 			randomIn(town).setSword(true);
 		}
@@ -103,13 +112,13 @@ public class Simulation {
 	public GameRules rules() { return rules; }
 	
 	/** @return All players in the game */
-	public List<Player> getPlayers() { return players; }
+	public Set<Player> getPlayers() { return players; }
 	
 	/** @return All mafia in the game */
-	public List<MafiaPlayer> getMafia() { return mafia; }
+	public Set<MafiaPlayer> getMafia() { return mafia; }
 	
 	/** @return All mafia in the game */
-	public List<TownPlayer> getTown() { return town; }
+	public Set<TownPlayer> getTown() { return town; }
 	
 	/** @return Brings a townie to the prioritized mafia hitlist */
 	public void prioritizeNightkill(Player player) { prioritizedNightkillPlayers.add(player); }
@@ -163,6 +172,7 @@ public class Simulation {
 		if (prioritizedNightkillPlayers.contains(player)) prioritizedNightkillPlayers.remove(player);
 		if (exoneratedPlayers.contains(player)) exoneratedPlayers.remove(player);
 		if (onceProtectedPlayers.contains(player)) onceProtectedPlayers.remove(player);
+		if (serialKillers.contains(player)) serialKillers.remove(player);
 		
 		for (SpecialRole role : SpecialRole.values()) {
 			if (specialists.get(role) == player) {
@@ -250,8 +260,9 @@ public class Simulation {
 			return randomIn(exoneratedTargets);
 		}
 		
-		HashSet<Player> legalPlayers = new HashSet<Player>(town);
+		HashSet<Player> legalPlayers = new HashSet<Player>(players);
 		legalPlayers.removeAll(woundedPlayers);
+		legalPlayers.removeAll(mafia);
 		
 		return randomIn(legalPlayers);
 	}
@@ -262,14 +273,14 @@ public class Simulation {
 	 * @return					The result of the game, or null if not over
 	 */
 	private SimulationResult checkForResult(boolean isNight) {
-		if (mafia.size() > town.size()) {
+		if (mafia.size() > (town.size() + serialKillers.size())) {
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
-		} else if (mafia.size() == 0) {
+		} else if (mafia.size() == 0 && serialKillers.size() == 0) {
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
-		} else if (mafia.size() == 1 && town.size() == 1 && !isNight) {
+		} else if (mafia.size() <= 1 && town.size() <= 1 && serialKillers.size() <= 1 && players.size() <= 2 && !isNight) {
 			return new SimulationResult(Faction.TRUE_RNG, turnCount, isNight);
-		} else if (mafia.size() == town.size() && !isNight) {
-			return new SimulationResult(Faction.RNG, turnCount, true);
+		} else if (serialKillers.size() > 0 && players.size() == 1) {
+			return new SimulationResult(Faction.SK, turnCount, isNight);
 		} else {
 			return null;
 		}
@@ -365,5 +376,14 @@ public class Simulation {
 	 */
 	public static <T> T randomIn(Set<T> collection) {
 		return randomIn(new ArrayList<T>(collection));
+	}
+	
+	/**
+	 * Returns true chance percent of the time.
+	 * @param	chance			The probability of returning true, from 0.0 to 1.0
+	 * @return					True if the chance succeeds
+	 */
+	public static boolean chance(float chance) {
+		return rand.nextFloat() < chance;
 	}
 }

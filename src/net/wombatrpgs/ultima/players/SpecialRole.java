@@ -16,7 +16,8 @@ public enum SpecialRole {
 	BLACK_MAGE		("black mage"),
 	DOCTOR			("doctor"),
 	THIEF			("thief"),
-	SMITH			("blacksmith");
+	SMITH			("blacksmith"),
+	SERIAL_KILLER	("bad chef");
 	
 	private String displayName;
 	
