@@ -32,9 +32,11 @@ public class UltimaSim {
 		GameRules rules = new GameRules();
 		rules.playerCount = 15;
 		rules.mafiaCount = 3;
-		//rules.enabledRoles.put(SpecialRole.SEER, true);
+		rules.enabledRoles.put(SpecialRole.SEER, true);
 		rules.enabledRoles.put(SpecialRole.SERIAL_KILLER, true);
+//		rules.enabledRoles.put(SpecialRole.JOKER, true);
 		rules.useSword = false;
+		rules.majorityVotesOnly = true;
 		
 		for (int i = 0; i < iterations; i += 1) {
 			Simulation simulation = new Simulation(rules);
@@ -71,5 +73,4 @@ public class UltimaSim {
 		String formattedNights = String.format("%.1f", nightPercent * 100.0f);
 		System.out.println("The game ended with a nightkill " + formattedNights + "% of the time.");
 	}
-
 }

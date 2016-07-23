@@ -28,12 +28,14 @@ public class Simulation {
 	private Set<MafiaPlayer> mafia;
 	private Set<TownPlayer> town;
 	private Set<Player> serialKillers;
+	private Set<Player> jokers;
 	private Map<SpecialRole, Player> specialists;
 	
 	private Set<Player> prioritizedNightkillPlayers;
 	private Set<Player> prioritizedDaykillPlayers;
 	private Set<Player> exoneratedPlayers;
 	private Set<Player> onceProtectedPlayers;
+	private Set<Player> knownUnaligned;
 	
 	private GameRules rules;
 	private int turnCount;
@@ -49,18 +51,34 @@ public class Simulation {
 		mafia = new HashSet<MafiaPlayer>();
 		town = new HashSet<TownPlayer>();
 		serialKillers = new HashSet<Player>();
+		jokers = new HashSet<Player>();
 		specialists = new HashMap<SpecialRole, Player>();
 		
 		prioritizedNightkillPlayers = new HashSet<Player>();
 		prioritizedDaykillPlayers = new HashSet<Player>();
 		exoneratedPlayers = new HashSet<Player>();
 		onceProtectedPlayers = new HashSet<Player>();
+		knownUnaligned = new HashSet<Player>();
 		
 		turnCount = 0;
 		
 		// jank as hell role initiation
 		
-		for (int i = 0; i < rules.playerCount - rules.mafiaCount; i += 1) {
+		if (rules.enabledRoles.get(SpecialRole.SERIAL_KILLER)) {
+			Player killer = new SerialKiller(this);
+			specialists.put(SpecialRole.SERIAL_KILLER, killer);
+			players.add(killer);
+			serialKillers.add(killer);
+		}
+		
+		if (rules.enabledRoles.get(SpecialRole.JOKER)) {
+			Player joker = new Joker(this);
+			specialists.put(SpecialRole.JOKER, joker);
+			players.add(joker);
+			jokers.add(joker);
+		}
+		
+		while (players.size() < rules.playerCount) {
 			TownPlayer townie;
 			if (rules.enabledRoles.get(SpecialRole.SEER) && !isAlive(SpecialRole.SEER)) {
 				townie = new Seer(this);
@@ -94,13 +112,6 @@ public class Simulation {
 			}
 			mafia.add(mafioso);
 			players.add(mafioso);
-		}
-		
-		if (rules.enabledRoles.get(SpecialRole.SERIAL_KILLER)) {
-			Player killer = new SerialKiller(this);
-			specialists.put(SpecialRole.SERIAL_KILLER, killer);
-			players.add(killer);
-			serialKillers.add(killer);
 		}
 		
 		if (rules.useSword) {
@@ -144,6 +155,9 @@ public class Simulation {
 	/** Sets assassination mode on */
 	public void enhanceNightkill() { this.enhancedNightkill = true; }
 	
+	/** @param player A player to mark as known to town as non-town non-mafia, to kill later */
+	public void markKnownUnaligned(Player player) { this.knownUnaligned.add(player); }
+	
 	/**
 	 * Simulates the full run of the game.
 	 * @return					The result of the game
@@ -173,6 +187,8 @@ public class Simulation {
 		if (exoneratedPlayers.contains(player)) exoneratedPlayers.remove(player);
 		if (onceProtectedPlayers.contains(player)) onceProtectedPlayers.remove(player);
 		if (serialKillers.contains(player)) serialKillers.remove(player);
+		if (knownUnaligned.contains(player)) knownUnaligned.remove(player);
+		if (jokers.contains(player)) jokers.remove(player);
 		
 		for (SpecialRole role : SpecialRole.values()) {
 			if (specialists.get(role) == player) {
@@ -218,8 +234,16 @@ public class Simulation {
 	
 	/**@return The player that town chooses to daykill next */
 	public Player getDaykillTarget() {
+		if (rules.majorityVotesOnly && (float)mafia.size() >= ((float)players.size()) / 2.0f) {
+			return null;
+		}
+		
 		if (prioritizedDaykillPlayers.size() > 0) {
 			return randomIn(prioritizedDaykillPlayers);
+		}
+		
+		if (mafia.size() == 0 && knownUnaligned.size() > 0) {
+			return randomIn(knownUnaligned);
 		}
 		
 		HashSet<Player> validTargets = new HashSet<Player>(players);
@@ -273,11 +297,14 @@ public class Simulation {
 	 * @return					The result of the game, or null if not over
 	 */
 	private SimulationResult checkForResult(boolean isNight) {
-		if (mafia.size() > (town.size() + serialKillers.size())) {
+		if ((float)mafia.size() > ((float)players.size()) / 2.0f) {
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
+		} else if (jokers.size() > 0 && players.size() == jokers.size()) {
+			return new SimulationResult(Faction.JOKER, turnCount, isNight);
 		} else if (mafia.size() == 0 && serialKillers.size() == 0) {
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
-		} else if (mafia.size() <= 1 && town.size() <= 1 && serialKillers.size() <= 1 && players.size() <= 2 && !isNight) {
+		} else if (mafia.size() <= 1 && town.size() <= 1 && serialKillers.size() <= 1 && players.size() <= 2 &&
+				!isNight && !rules.majorityVotesOnly) {
 			return new SimulationResult(Faction.TRUE_RNG, turnCount, isNight);
 		} else if (serialKillers.size() > 0 && players.size() == 1) {
 			return new SimulationResult(Faction.SK, turnCount, isNight);
@@ -305,7 +332,9 @@ public class Simulation {
 		}
 		
 		Player daykillTarget = getDaykillTarget();
-		daykillTarget.attemptDaykill();
+		if (daykillTarget != null) {
+			daykillTarget.attemptDaykill();
+		}
 		result = checkForResult(true);
 		if (result != null) {
 			return result;

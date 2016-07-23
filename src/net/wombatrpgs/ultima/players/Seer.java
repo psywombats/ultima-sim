@@ -64,15 +64,16 @@ public class Seer extends TownPlayer {
 			toInvestigate.remove(player);
 			
 			// we found scum! let everyone know! (...scum will probs kill us)
-			if (player.getFaction() == Faction.MAFIA) {
-				if (!player.deceitActive) {
-					simulation.prioritizeDaykill(player);
-					simulation.prioritizeNightkill(this);
-				} else {
-					// whoops this is gonna cost big if seer ever roleclaims
-					misidentifiedPlayers.add(player);
-				}
-			}
+//			if (player.getFaction() == Faction.MAFIA ||
+//					(player.getFaction() == Faction.JOKER && Simulation.chance(0.5f))) {
+//				if (!player.deceitActive && player.getFaction() != Faction.JOKER) {
+//					simulation.prioritizeDaykill(player);
+//					simulation.prioritizeNightkill(this);
+//				} else {
+//					// whoops this is gonna cost big if seer ever roleclaims
+//					misidentifiedPlayers.add(player);
+//				}
+//			}
 		}
 		
 		// if there's a safe doctor around, seer immediately role claims
@@ -94,6 +95,15 @@ public class Seer extends TownPlayer {
 					} else {
 						simulation.prioritizeDaykill(player);
 					}
+				} else if (player.getFaction() == Faction.SK) {
+					if (misidentifiedPlayers.contains(player)) {
+						simulation.exoneratePlayer(player);
+					} else {
+						simulation.markKnownUnaligned(player);
+					}
+				} else if (player.getFaction() == Faction.JOKER) {
+					// if we thought they were scum, we would've revealed by now
+					simulation.exoneratePlayer(player);
 				} else {
 					simulation.exoneratePlayer(player);
 				}
