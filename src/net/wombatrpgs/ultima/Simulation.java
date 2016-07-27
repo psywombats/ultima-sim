@@ -89,6 +89,10 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.SMITH) && !isAlive(SpecialRole.SMITH)) {
 				townie = new Smith(this);
 				specialists.put(SpecialRole.SMITH, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.INNOCENT) && !isAlive(SpecialRole.INNOCENT)) {
+				townie = new TownPlayer(this);
+				specialists.put(SpecialRole.INNOCENT, townie);
+				exoneratedPlayers.add(townie);
 			} else {
 				townie = new TownPlayer(this);
 			}
@@ -301,12 +305,9 @@ public class Simulation {
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
 		} else if (jokers.size() > 0 && players.size() == jokers.size()) {
 			return new SimulationResult(Faction.JOKER, turnCount, isNight);
-		} else if (mafia.size() == 0 && serialKillers.size() == 0) {
+		} else if (mafia.size() == 0) {
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
-		} else if (mafia.size() <= 1 && town.size() <= 1 && serialKillers.size() <= 1 && players.size() <= 2 &&
-				!isNight && !rules.majorityVotesOnly) {
-			return new SimulationResult(Faction.TRUE_RNG, turnCount, isNight);
-		} else if (serialKillers.size() > 0 && players.size() == 1) {
+		} else if (serialKillers.size() > 0 && players.size() == serialKillers.size()) {
 			return new SimulationResult(Faction.SK, turnCount, isNight);
 		} else {
 			return null;
