@@ -40,6 +40,7 @@ public class Simulation {
 	private GameRules rules;
 	private int turnCount;
 	private boolean enhancedNightkill;
+	private boolean debugLog;
 	
 	/**
 	 * Creates a game with the given number of players. Autoassigns roles.
@@ -78,6 +79,24 @@ public class Simulation {
 			jokers.add(joker);
 		}
 		
+		for (int i = 0; i < rules.mafiaCount; i += 1) {
+			MafiaPlayer mafioso;
+			if (rules.enabledRoles.get(SpecialRole.ASSASSIN) && !isAlive(SpecialRole.ASSASSIN)) {
+				mafioso = new Assassin(this);
+				specialists.put(SpecialRole.ASSASSIN, mafioso);
+			} else if (rules.enabledRoles.get(SpecialRole.BLACK_MAGE) && !isAlive(SpecialRole.BLACK_MAGE)) {
+				mafioso = new BlackMage(this);
+				specialists.put(SpecialRole.BLACK_MAGE, mafioso);
+			} else if (rules.enabledRoles.get(SpecialRole.THIEF) && !isAlive(SpecialRole.THIEF)) {
+				mafioso = new Thief(this);
+				specialists.put(SpecialRole.THIEF, mafioso);
+			} else {
+				mafioso = new MafiaPlayer(this);
+			}
+			mafia.add(mafioso);
+			players.add(mafioso);
+		}
+		
 		while (players.size() < rules.playerCount) {
 			TownPlayer townie;
 			if (rules.enabledRoles.get(SpecialRole.SEER) && !isAlive(SpecialRole.SEER)) {
@@ -98,24 +117,6 @@ public class Simulation {
 			}
 			players.add(townie);
 			town.add(townie);
-		}
-		
-		for (int i = 0; i < rules.mafiaCount; i += 1) {
-			MafiaPlayer mafioso;
-			if (rules.enabledRoles.get(SpecialRole.ASSASSIN) && !isAlive(SpecialRole.ASSASSIN)) {
-				mafioso = new Assassin(this);
-				specialists.put(SpecialRole.ASSASSIN, mafioso);
-			} else if (rules.enabledRoles.get(SpecialRole.BLACK_MAGE) && !isAlive(SpecialRole.BLACK_MAGE)) {
-				mafioso = new BlackMage(this);
-				specialists.put(SpecialRole.BLACK_MAGE, mafioso);
-			} else if (rules.enabledRoles.get(SpecialRole.THIEF) && !isAlive(SpecialRole.THIEF)) {
-				mafioso = new Thief(this);
-				specialists.put(SpecialRole.THIEF, mafioso);
-			} else {
-				mafioso = new MafiaPlayer(this);
-			}
-			mafia.add(mafioso);
-			players.add(mafioso);
 		}
 	}
 	
@@ -158,6 +159,9 @@ public class Simulation {
 	/** @param player A player to mark as known to town as non-town non-mafia, to kill later */
 	public void markKnownUnaligned(Player player) { this.knownUnaligned.add(player); }
 	
+	/** Turns on verbose logging for what happens during the game */
+	public void setDebugOn() { this.debugLog = true; }
+	
 	/**
 	 * Simulates the full run of the game.
 	 * @return					The result of the game
@@ -178,6 +182,8 @@ public class Simulation {
 		if (!players.contains(player)) {
 			System.err.println("Player is dead: " + player);
 		}
+		
+		storyLog("And so " + player + " died.");
 		
 		players.remove(player);
 		if (mafia.contains(player)) mafia.remove(player);
@@ -235,24 +241,33 @@ public class Simulation {
 	/**@return The player that town chooses to daykill next */
 	public Player getDaykillTarget() {
 		if (rules.majorityVotesOnly && (float)mafia.size() >= ((float)players.size()) / 2.0f) {
+			storyLog("The mafia stalemated the vote and no one was lynched.");
 			return null;
 		}
 		
 		if (prioritizedDaykillPlayers.size() > 0) {
-			return randomIn(prioritizedDaykillPlayers);
+			Player result = randomIn(prioritizedDaykillPlayers);
+			storyLog("Town had strong reason to believe " + result + " was scum lynched.");
+			return result;
 		}
 		
 		if (mafia.size() == 0 && knownUnaligned.size() > 0) {
-			return randomIn(knownUnaligned);
+			Player result = randomIn(knownUnaligned);
+			storyLog("Town had strong reason to believe " + result + " was non-town and lynched.");
+			return result;
 		}
 		
 		HashSet<Player> validTargets = new HashSet<Player>(players);
 		validTargets.removeAll(exoneratedPlayers);
 		if (validTargets.size() > 0) {
-			return randomIn(validTargets);
+			Player result = randomIn(validTargets);
+			storyLog("Town randomly chose " + result + " from non-exonerated players and lynched.");
+			return result;
 		}
 		
-		return randomIn(players);
+		Player result = randomIn(players);
+		storyLog("Town thought everyone was townish and so randomly lynched " + result + ".");
+		return result;
 	}
 	
 	/** @return The poor slob that mafia chooses to nightkill */
@@ -271,6 +286,7 @@ public class Simulation {
 					specialists.get(SpecialRole.DOCTOR).isNullified()  ||
 					!this.enhancedNightkill) {
 				Player target = randomIn(prioritizedNightkillPlayers);
+				storyLog("Scum thought " + target + " probably had a role and tried to NK them.");
 				if (!target.isWounded() && players.contains(target)) {
 					return target;
 				}
@@ -281,14 +297,17 @@ public class Simulation {
 		exoneratedTargets.removeAll(mafia);
 		exoneratedTargets.removeAll(woundedPlayers);
 		if (exoneratedTargets.size() > 0) {
-			return randomIn(exoneratedTargets);
+			Player result = randomIn(exoneratedTargets);
+			storyLog("Scum chose to NK " + result + " because town knew they were innocent.");
 		}
 		
 		HashSet<Player> legalPlayers = new HashSet<Player>(players);
 		legalPlayers.removeAll(woundedPlayers);
 		legalPlayers.removeAll(mafia);
 		
-		return randomIn(legalPlayers);
+		Player target = randomIn(legalPlayers);
+		storyLog("Scum randomly chose to NK " + target + ".");
+		return target;
 	}
 	
 	/**
@@ -297,13 +316,17 @@ public class Simulation {
 	 * @return					The result of the game, or null if not over
 	 */
 	private SimulationResult checkForResult(boolean isNight) {
-		if ((float)mafia.size() > ((float)players.size()) / 2.0f) {
+		if ((float)mafia.size() >= ((float)town.size())) {
+			storyLog("The mafia now outnumber the town. MAFIA WIN.\n\n");
 			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
 		} else if (jokers.size() > 0 && players.size() == jokers.size()) {
+			storyLog("Only jokers remain. JOKER WIN.\n\n");
 			return new SimulationResult(Faction.JOKER, turnCount, isNight);
 		} else if (mafia.size() == 0) {
+			storyLog("The vicious scums are dead. TOWN WIN.\n\n");
 			return new SimulationResult(Faction.TOWN, turnCount, isNight);
 		} else if (serialKillers.size() > 0 && players.size() == serialKillers.size()) {
+			storyLog("Everyone's dead but the killer. SK WIN.\n\n");
 			return new SimulationResult(Faction.SK, turnCount, isNight);
 		} else {
 			return null;
@@ -317,6 +340,10 @@ public class Simulation {
 	private SimulationResult simulateTurn() {
 		SimulationResult result;
 		List<Player> iteratingPlayers;
+		
+		storyLog("\n\n ** Day " + turnCount + " ** ");
+		storyLog("Town players alive:  " + town.size());
+		storyLog("Mafia players alive: " + mafia.size());
 		
 		iteratingPlayers = new ArrayList<Player>(players);
 		for (Player player : iteratingPlayers) {
@@ -332,7 +359,7 @@ public class Simulation {
 		if (daykillTarget != null) {
 			daykillTarget.attemptDaykill();
 		}
-		result = checkForResult(true);
+		result = checkForResult(false);
 		if (result != null) {
 			return result;
 		}
@@ -343,6 +370,8 @@ public class Simulation {
 				player.onPostDaykill();
 			}
 		}
+		
+		storyLog("\n ** Night " + turnCount + " ** ");
 		
 		iteratingPlayers = new ArrayList<Player>(players);
 		for (Player player : iteratingPlayers) {
@@ -378,6 +407,17 @@ public class Simulation {
 		
 		turnCount += 1;
 		return null;
+	}
+	
+	/**
+	 * Logs an event as having occurred (if debug settings are enabled). Useful to produce narrative
+	 * events of the game as it plays out.
+	 * @param	text			The text to print if enabled, prose
+	 */
+	public void storyLog(String text) {
+		if (debugLog) {
+			System.out.println(text);
+		}
 	}
 
 	/**

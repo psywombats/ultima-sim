@@ -6,12 +6,11 @@
  */
 package net.wombatrpgs.ultima.players;
 
-import java.util.HashSet;
-
 import net.wombatrpgs.ultima.Simulation;
 
 /**
- * Wins when they're the only one left. Shows up as random garbage to seers.
+ * Wins when they're the only one left. Shows up as random garbage to seers. Survivor. Something
+ * dum from Kloe's game probably (ew).
  */
 public class Joker extends Player {
 	
@@ -31,19 +30,10 @@ public class Joker extends Player {
 	}
 
 	/**
-	 * @see net.wombatrpgs.ultima.players.Player#useSword()
+	 * @see net.wombatrpgs.ultima.players.Player#friendlyName()
 	 */
 	@Override
-	protected void useSword() {
-		Player target = simulation.getDaykillTarget();
-		if (target != null) {
-			target.attemptNightkill(false);
-			HashSet<Player> valid = new HashSet<Player>(simulation.getPlayers());
-			valid.remove(this);
-			setSword(false);
-			if (valid.size() > 0) {
-				Simulation.randomIn(valid).setSword(true);
-			}
-		}
+	protected String friendlyName() {
+		return "Joker";
 	}
 }

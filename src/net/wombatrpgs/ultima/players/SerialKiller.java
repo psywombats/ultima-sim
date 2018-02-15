@@ -16,7 +16,7 @@ import net.wombatrpgs.ultima.Simulation;
 public class SerialKiller extends Player {
 	
 	// nightkill only succeeds at this percent, otherwise noop
-	private static float SUCCESS_RATE = 0.5f;
+	private static float SUCCESS_RATE = 1.0f;
 
 	/**
 	 * Inherited constructor.
@@ -41,20 +41,10 @@ public class SerialKiller extends Player {
 	}
 
 	/**
-	 * @see net.wombatrpgs.ultima.players.Player#useSword()
+	 * @see net.wombatrpgs.ultima.players.Player#friendlyName()
 	 */
-	@Override protected void useSword() {
-		HashSet<Player> legal = new HashSet<Player>(simulation.getPlayers());
-		legal.remove(this);
-		Player target = Simulation.randomIn(legal);
-		if (target != null) {
-			target.attemptNightkill(false);
-			legal.remove(target);
-			setSword(false);
-			Player receiver = Simulation.randomIn(legal);
-			if (receiver != null) {
-				receiver.setSword(true);
-			}
-		}
+	@Override
+	protected String friendlyName() {
+		return "Serial Killer";
 	}
 }

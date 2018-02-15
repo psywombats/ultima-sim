@@ -61,12 +61,6 @@ public abstract class Player {
 	/** @return True if this player is mortally wounded */
 	public boolean isWounded() { return wounded; }
 	
-	/** @return Checks if the hero has a sword */
-	public boolean hasSword() { return hasSword; }
-	
-	/** @param hasSword true to give, false to remove */
-	public void setSword(boolean hasSword) { this.hasSword = hasSword; }
-	
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
@@ -140,9 +134,6 @@ public abstract class Player {
 		if (wounded) {
 			dying = true;
 		}
-		if (hasSword()) {
-			useSword();
-		}
 	}
 	
 	/**
@@ -154,7 +145,13 @@ public abstract class Player {
 	}
 	
 	/**
-	 * Use the sword and pass it on.
+	 * @see java.lang.Object#toString()
 	 */
-	protected abstract void useSword();
+	@Override
+	public String toString() {
+		return friendlyName();
+	}
+	
+	/** @return The user-facing name for this player, usually their role name */
+	protected abstract String friendlyName();
 }

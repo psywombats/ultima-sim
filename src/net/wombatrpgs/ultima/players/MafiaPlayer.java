@@ -22,16 +22,10 @@ public class MafiaPlayer extends Player {
 	}
 
 	/**
-	 * @see net.wombatrpgs.ultima.players.Player#useSword()
+	 * @see net.wombatrpgs.ultima.players.Player#friendlyName()
 	 */
-	@Override protected void useSword() {
-		Player target = simulation.getNightkillTarget();
-		if (target != null) {
-			target.attemptNightkill(false);
-			setSword(false);
-			if (simulation.getTown().size() > 0) {
-				Simulation.randomIn(simulation.getTown()).setSword(true);
-			}
-		}
+	@Override
+	protected String friendlyName() {
+		return "Mafioso";
 	}
 }
