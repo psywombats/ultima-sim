@@ -117,10 +117,6 @@ public class Simulation {
 			mafia.add(mafioso);
 			players.add(mafioso);
 		}
-		
-		if (rules.useSword) {
-			randomIn(town).setSword(true);
-		}
 	}
 	
 	/** @return The game rules */

@@ -25,9 +25,6 @@ public class GameRules {
 	/** Is the special role enabled? */
 	public Map<SpecialRole, Boolean> enabledRoles;
 	
-	/** Is the vigilante sword in play? */
-	public boolean useSword;
-	
 	/** Town can lynch by majority vote and else votes nobody */
 	public boolean majorityVotesOnly;
 	

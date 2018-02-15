@@ -31,13 +31,10 @@ public class UltimaSim {
 		
 		GameRules rules = new GameRules();
 		rules.playerCount = 10;
-		rules.mafiaCount = 3;
-		rules.enabledRoles.put(SpecialRole.SEER, true);
-		//rules.enabledRoles.put(SpecialRole.SERIAL_KILLER, true);
-		rules.enabledRoles.put(SpecialRole.JOKER, true);
-		rules.enabledRoles.put(SpecialRole.INNOCENT, true);
-		rules.useSword = false;
-		rules.majorityVotesOnly = false;
+		rules.mafiaCount = 2;
+//		rules.enabledRoles.put(SpecialRole.SERIAL_KILLER, true);
+//		rules.enabledRoles.put(SpecialRole.JOKER, true);
+		rules.majorityVotesOnly = true;
 		
 		for (int i = 0; i < iterations; i += 1) {
 			Simulation simulation = new Simulation(rules);
@@ -61,8 +58,10 @@ public class UltimaSim {
 		for (Faction faction : Faction.values()) {
 			String name = faction.getDisplayName();
 			float winPercent = (float)wins.get(faction) / (float)iterations;
-			String formattedPercent = String.format("%.1f", winPercent * 100.0f);
-			System.out.println(name + ": " + formattedPercent + "%");
+			if (winPercent > 0) {
+				String formattedPercent = String.format("%.1f", winPercent * 100.0f);
+				System.out.println(name + ": " + formattedPercent + "%");
+			}
 		}
 		System.out.println();
 		
