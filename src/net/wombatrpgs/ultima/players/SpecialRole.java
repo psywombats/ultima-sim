@@ -19,7 +19,8 @@ public enum SpecialRole {
 	SMITH			("blacksmith"),
 	SERIAL_KILLER	("bad chef"),
 	JOKER			("breadcrumbed"),
-	INNOCENT		("innocent");
+	INNOCENT		("innocent"),
+	DETECTIVE		("detective");
 	
 	private String displayName;
 	

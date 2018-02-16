@@ -102,6 +102,9 @@ public class Simulation {
 			if (rules.enabledRoles.get(SpecialRole.SEER) && !isAlive(SpecialRole.SEER)) {
 				townie = new Seer(this);
 				specialists.put(SpecialRole.SEER, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.DETECTIVE) && !isAlive(SpecialRole.DETECTIVE)) {
+				townie = new Detective(this);
+				specialists.put(SpecialRole.DETECTIVE, townie);
 			} else if (rules.enabledRoles.get(SpecialRole.DOCTOR) && !isAlive(SpecialRole.DOCTOR)) {
 				townie = new Doctor(this);
 				specialists.put(SpecialRole.DOCTOR, townie);
