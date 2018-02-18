@@ -116,6 +116,8 @@ public class Simulation {
 				specialists.put(SpecialRole.SMITH, townie);
 			} else if (rules.enabledRoles.get(SpecialRole.PROTECTOR) && specialCount(SpecialRole.PROTECTOR) < Protector.getQuantity()) {
 				townie = new Protector(this);
+			} else if (rules.enabledRoles.get(SpecialRole.GUNMAN) && specialCount(SpecialRole.GUNMAN) < Gunman.getQuantity()) {
+				townie = new Gunman(this);
 			} else if (rules.enabledRoles.get(SpecialRole.INNOCENT) && !isAlive(SpecialRole.INNOCENT)) {
 				townie = new TownPlayer(this);
 				specialists.put(SpecialRole.INNOCENT, townie);
