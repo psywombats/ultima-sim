@@ -36,6 +36,10 @@ public class Detective extends TownPlayer {
 	@Override public void onPostNightkill() {
 		super.onPostNightkill();
 		
+		if (nullified) {
+			return;
+		}
+		
 		// the dead are not considered investigated in terms of claim chance
 		ArrayList<Player> deadPlayers = new ArrayList<Player>();
 		for (Player player : investigatedPlayers) {
