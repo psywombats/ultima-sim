@@ -28,4 +28,12 @@ public class TownPlayer extends Player {
 	protected String friendlyName() {
 		return "a random townie";
 	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return null;
+	}
 }

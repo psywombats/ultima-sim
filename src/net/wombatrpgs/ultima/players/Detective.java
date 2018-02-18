@@ -102,7 +102,15 @@ public class Detective extends TownPlayer {
 			}
 		}
 	}
-
+	
+	/**
+	 * @see net.wombatrpgs.ultima.players.TownPlayer#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return SpecialRole.DETECTIVE;
+	}
+	
 	/**
 	 * @see net.wombatrpgs.ultima.players.TownPlayer#friendlyName()
 	 */

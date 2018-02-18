@@ -33,6 +33,8 @@ public class UltimaSim {
 		rules.playerCount = 11;
 		rules.mafiaCount = 2;
 		rules.enabledRoles.put(SpecialRole.DETECTIVE, true);
+		rules.enabledRoles.put(SpecialRole.ROLEBLOCKER, true);
+		rules.enabledRoles.put(SpecialRole.PROTECTOR, true);
 		rules.majorityVotesOnly = true;
 		
 		for (int i = 0; i < iterations; i += 1) {

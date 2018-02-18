@@ -47,4 +47,12 @@ public class SerialKiller extends Player {
 	protected String friendlyName() {
 		return "Serial Killer";
 	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return SpecialRole.SERIAL_KILLER;
+	}
 }

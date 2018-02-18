@@ -28,4 +28,12 @@ public class MafiaPlayer extends Player {
 	protected String friendlyName() {
 		return "Mafioso";
 	}
+	
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return null;
+	}
 }

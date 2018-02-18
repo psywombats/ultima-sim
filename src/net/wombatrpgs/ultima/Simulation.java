@@ -87,6 +87,9 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.BLACK_MAGE) && !isAlive(SpecialRole.BLACK_MAGE)) {
 				mafioso = new BlackMage(this);
 				specialists.put(SpecialRole.BLACK_MAGE, mafioso);
+			} else if (rules.enabledRoles.get(SpecialRole.ROLEBLOCKER) && !isAlive(SpecialRole.ROLEBLOCKER)) {
+				mafioso = new Roleblocker(this);
+				specialists.put(SpecialRole.ROLEBLOCKER, mafioso);
 			} else if (rules.enabledRoles.get(SpecialRole.THIEF) && !isAlive(SpecialRole.THIEF)) {
 				mafioso = new Thief(this);
 				specialists.put(SpecialRole.THIEF, mafioso);
@@ -111,6 +114,8 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.SMITH) && !isAlive(SpecialRole.SMITH)) {
 				townie = new Smith(this);
 				specialists.put(SpecialRole.SMITH, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.PROTECTOR) && specialCount(SpecialRole.PROTECTOR) < Protector.getQuantity()) {
+				townie = new Protector(this);
 			} else if (rules.enabledRoles.get(SpecialRole.INNOCENT) && !isAlive(SpecialRole.INNOCENT)) {
 				townie = new TownPlayer(this);
 				specialists.put(SpecialRole.INNOCENT, townie);
@@ -250,7 +255,7 @@ public class Simulation {
 		
 		if (prioritizedDaykillPlayers.size() > 0) {
 			Player result = randomIn(prioritizedDaykillPlayers);
-			storyLog("Town had strong reason to believe " + result + " was scum lynched.");
+			storyLog("Town had strong reason to believe " + result + " was scum and lynched him.");
 			return result;
 		}
 		
@@ -334,6 +339,21 @@ public class Simulation {
 		} else {
 			return null;
 		}
+	}
+	
+	/**
+	 * Checks the number of living players with the given role.
+	 * @param	role			The role to check for
+	 * @return					The number of living players with that role
+	 */
+	private int specialCount(SpecialRole role) {
+		int count = 0;
+		for (Player player : players) {
+			if (player.getRole() == role) {
+				count += 1;
+			}
+		}
+		return count;
 	}
 	
 	/**

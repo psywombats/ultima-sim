@@ -55,7 +55,7 @@ public class BlackMage extends MafiaPlayer {
 			return;
 		}
 	}
-
+	
 	/**
 	 * Slows the victim.
 	 * @param	target			The player to slow

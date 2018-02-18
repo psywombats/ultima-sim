@@ -61,6 +61,9 @@ public abstract class Player {
 	/** @return True if this player is mortally wounded */
 	public boolean isWounded() { return wounded; }
 	
+	/** @return The special role occupied by this player, or null if vanilla */
+	public SpecialRole getRole() { return role(); }
+	
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
@@ -76,6 +79,7 @@ public abstract class Player {
 	 */
 	public void attemptNightkill(boolean ignoresProtection) {
 		if (isDoctorProtected && !ignoresProtection) {
+			simulation.storyLog("...but " + this + " was protected!");
 			simulation.onPlayerProtected(this);
 		} else if (hasShield && !ignoresProtection) {
 			hasShield = false;
@@ -154,4 +158,7 @@ public abstract class Player {
 	
 	/** @return The user-facing name for this player, usually their role name */
 	protected abstract String friendlyName();
+	
+	/** @return The special role of this player, or null if vanilla */
+	protected abstract SpecialRole role();
 }

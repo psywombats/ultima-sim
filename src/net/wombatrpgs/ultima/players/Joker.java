@@ -36,4 +36,12 @@ public class Joker extends Player {
 	protected String friendlyName() {
 		return "Joker";
 	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.Player#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return SpecialRole.JOKER;
+	}
 }

@@ -22,11 +22,11 @@ public class Roleblocker extends MafiaPlayer {
 	}
 
 	/**
-	 * @see net.wombatrpgs.ultima.players.Player#onPreNightkill()
+	 * @see net.wombatrpgs.ultima.players.Player#onPostDaykill()
 	 */
 	@Override
-	public void onPreNightkill() {
-		super.onPreNightkill();
+	public void onPostDaykill() {
+		super.onPostDaykill();
 		
 		// the "umineko rule"
 		if (simulation.getMafia().size() == 1) {
@@ -37,7 +37,15 @@ public class Roleblocker extends MafiaPlayer {
 		target.nullified = true;
 		simulation.storyLog(this + " blocked " + target + ".");
 	}
-
+	
+	/**
+	 * @see net.wombatrpgs.ultima.players.TownPlayer#role()
+	 */
+	@Override
+	protected SpecialRole role() {
+		return SpecialRole.ROLEBLOCKER;
+	}
+	
 	/**
 	 * @see net.wombatrpgs.ultima.players.MafiaPlayer#friendlyName()
 	 */
