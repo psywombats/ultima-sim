@@ -42,25 +42,24 @@ public class Protector extends TownPlayer {
 			return;
 		}
 		
-		Player target;
 		if (simulation.getPrioritizedNightkills().size() > 0) {
-			target = Simulation.randomIn(simulation.getPrioritizedNightkills());
-			simulation.storyLog(this + " knows mafia's after " + target + " and protected them.");
+			visiting = Simulation.randomIn(simulation.getPrioritizedNightkills());
+			simulation.storyLog(this + " knows mafia's after " + visiting + " and protected them.");
 		} else {
 			double roll = Math.random();
 			if (roll > .5) {
-				target = Simulation.randomIn(simulation.getPlayers());
-				simulation.storyLog(this + " randomly chose to protect " + target + ".");
+				visiting = Simulation.randomIn(simulation.getPlayers());
+				simulation.storyLog(this + " randomly chose to protect " + visiting + ".");
 			} else {
-				target = this;
+				visiting = this;
 				simulation.storyLog(this + " chose to defend themselves.");
 			}
 		}
 		
-		if (partialTargets.contains(target)) {
-			target.protect();
+		if (partialTargets.contains(visiting)) {
+			visiting.protect();
 		} else {
-			partialTargets.add(target);
+			partialTargets.add(visiting);
 		}
 	}
 	

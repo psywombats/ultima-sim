@@ -23,7 +23,8 @@ public enum SpecialRole {
 	ROLEBLOCKER		("roleblocker"),
 	PROTECTOR		("protector"),
 	GUNMAN			("gunman"),
-	DETECTIVE		("detective");
+	DETECTIVE		("detective"),
+	TRACKER			("tracker");
 	
 	private String displayName;
 	

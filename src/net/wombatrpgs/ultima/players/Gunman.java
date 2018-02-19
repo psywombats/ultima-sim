@@ -54,24 +54,27 @@ public class Gunman extends TownPlayer {
 	 */
 	@Override
 	public void onPreNightkill() {
-		Player target;
+		if (nullified) {
+			return;
+		}
+		
 		if (simulation.getPrioritizedDaykills().size() > 0) {
-			target = Simulation.randomIn(simulation.getPrioritizedNightkills());
-			simulation.storyLog(this + " thinks " + target + " is scum and targetted them.");
+			visiting = Simulation.randomIn(simulation.getPrioritizedNightkills());
+			simulation.storyLog(this + " thinks " + visiting + " is scum and targetted them.");
 		} else {
-			target = Simulation.randomIn(simulation.getPlayers());
-			if (target == this) {
+			visiting = Simulation.randomIn(simulation.getPlayers());
+			if (visiting == this) {
 				onPreNightkill();
 				return;
 			}
-			simulation.storyLog(this + " randomly pursued " + target + ".");
+			simulation.storyLog(this + " randomly pursued " + visiting + ".");
 		}
 		
-		if (partialTargets.contains(target)) {
-			simulation.storyLog("Two gunman targetted " + target + " so they got shot.");
-			target.attemptNightkill(false);
+		if (partialTargets.contains(visiting)) {
+			simulation.storyLog("Two gunman targetted " + visiting + " so they got shot.");
+			visiting.attemptNightkill(this, false);
 		} else  {
-			partialTargets.add(target);
+			partialTargets.add(visiting);
 		}
 	}
 

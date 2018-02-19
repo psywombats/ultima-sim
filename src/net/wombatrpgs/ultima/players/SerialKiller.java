@@ -35,7 +35,7 @@ public class SerialKiller extends Player {
 			legal.remove(this);
 			Player target = Simulation.randomIn(legal);
 			if (target != null) {
-				target.attemptNightkill(false);
+				target.attemptNightkill(this, false);
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 package net.wombatrpgs.ultima;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -108,6 +109,9 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.DETECTIVE) && !isAlive(SpecialRole.DETECTIVE)) {
 				townie = new Detective(this);
 				specialists.put(SpecialRole.DETECTIVE, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.TRACKER) && !isAlive(SpecialRole.TRACKER)) {
+				townie = new Tracker(this);
+				specialists.put(SpecialRole.TRACKER, townie);
 			} else if (rules.enabledRoles.get(SpecialRole.DOCTOR) && !isAlive(SpecialRole.DOCTOR)) {
 				townie = new Doctor(this);
 				specialists.put(SpecialRole.DOCTOR, townie);
@@ -280,8 +284,12 @@ public class Simulation {
 		return result;
 	}
 	
-	/** @return The poor slob that mafia chooses to nightkill */
-	public Player getNightkillTarget() {
+	/**
+	 * Determines who the mafia should kill
+	 * @param 	inflicter		The mafioso doing the dirty work
+	 * @return					The poor slob to nightkill
+	 */
+	public Player getNightkillTarget(MafiaPlayer inflicter) {
 		HashSet<Player> woundedPlayers = new HashSet<Player>();
 		for (Player player : town) {
 			if (player.isWounded()) {
@@ -296,7 +304,7 @@ public class Simulation {
 					specialists.get(SpecialRole.DOCTOR).isNullified()  ||
 					!this.enhancedNightkill) {
 				Player target = randomIn(prioritizedNightkillPlayers);
-				storyLog("Scum thought " + target + " probably had a role and tried to NK them.");
+				storyLog("Scum thought " + target + " had a role so " + inflicter + " NK'd them.");
 				if (!target.isWounded() && players.contains(target)) {
 					return target;
 				}
@@ -308,7 +316,7 @@ public class Simulation {
 		exoneratedTargets.removeAll(woundedPlayers);
 		if (exoneratedTargets.size() > 0) {
 			Player result = randomIn(exoneratedTargets);
-			storyLog("Scum chose to NK " + result + " because town knew they were innocent.");
+			storyLog("Town knows " + result + " is innocent so " + inflicter + " NK'd them");
 		}
 		
 		HashSet<Player> legalPlayers = new HashSet<Player>(players);
@@ -316,7 +324,7 @@ public class Simulation {
 		legalPlayers.removeAll(mafia);
 		
 		Player target = randomIn(legalPlayers);
-		storyLog("Scum randomly chose to NK " + target + ".");
+		storyLog("For the NK, " + inflicter + " randomly targeted " + target + ".");
 		return target;
 	}
 	
@@ -409,9 +417,10 @@ public class Simulation {
 			return result;
 		}
 		
-		Player nightkillTarget = getNightkillTarget();
+		MafiaPlayer inflicter = getNightkillInflicter();
+		Player nightkillTarget = getNightkillTarget(inflicter);
 		if (nightkillTarget != null) {
-			nightkillTarget.attemptNightkill(this.enhancedNightkill);
+			nightkillTarget.attemptNightkill(inflicter, this.enhancedNightkill);
 		}
 		enhancedNightkill = false;
 		result = checkForResult(true);
@@ -432,6 +441,21 @@ public class Simulation {
 		
 		turnCount += 1;
 		return null;
+	}
+	
+	/**
+	 * Finds the mafioso responsible to inflict the nightkill.
+	 * @return					The most suitable mafioso
+	 */
+	private MafiaPlayer getNightkillInflicter() {
+		List<MafiaPlayer> shuffled = new ArrayList<>(getMafia());
+		Collections.shuffle(shuffled);
+		for (MafiaPlayer player : shuffled) {
+			if (player.getRole() == null) {
+				return player;
+			}
+		}
+		return shuffled.get(0);
 	}
 	
 	/**

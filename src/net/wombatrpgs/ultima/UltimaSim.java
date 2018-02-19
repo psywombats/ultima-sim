@@ -36,6 +36,7 @@ public class UltimaSim {
 		rules.enabledRoles.put(SpecialRole.ROLEBLOCKER, true);
 		rules.enabledRoles.put(SpecialRole.PROTECTOR, true);
 		rules.enabledRoles.put(SpecialRole.GUNMAN, true);
+		rules.enabledRoles.put(SpecialRole.TRACKER, true);
 		rules.majorityVotesOnly = true;
 		
 		for (int i = 0; i < iterations; i += 1) {

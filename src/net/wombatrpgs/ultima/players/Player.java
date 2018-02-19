@@ -15,6 +15,7 @@ public abstract class Player {
 	
 	protected Faction faction;
 	protected Simulation simulation;
+	protected Player visiting;
 	protected boolean isDoctorProtected;
 	protected boolean alive = true;
 	protected boolean nullified;
@@ -75,9 +76,11 @@ public abstract class Player {
 	/**
 	 * Attempts to daykill this player. Can be blocked by random junk maybe. Handles removing the
 	 * player from the simulation if they die.
+	 * @param	inflicter			The dick trying to kill us
 	 * @param	ignoresProtection	True to penetrate defenses
 	 */
-	public void attemptNightkill(boolean ignoresProtection) {
+	public void attemptNightkill(Player inflicter, boolean ignoresProtection) {
+		inflicter.visiting = this;
 		if (isDoctorProtected && !ignoresProtection) {
 			simulation.storyLog("...but " + this + " was protected!");
 			simulation.onPlayerProtected(this);
@@ -118,7 +121,7 @@ public abstract class Player {
 	 * Called at the very startingest start of night.
 	 */
 	public void onPostDaykill() {
-		// nothing by default
+		visiting = null;
 	}
 	
 	/**

@@ -33,9 +33,9 @@ public class Roleblocker extends MafiaPlayer {
 			return;
 		}
 		
-		Player target = Simulation.randomIn(simulation.getTown());
-		target.nullified = true;
-		simulation.storyLog(this + " blocked " + target + ".");
+		visiting = Simulation.randomIn(simulation.getTown());
+		visiting.nullify();
+		simulation.storyLog(this + " blocked " + visiting + ".");
 	}
 	
 	/**
