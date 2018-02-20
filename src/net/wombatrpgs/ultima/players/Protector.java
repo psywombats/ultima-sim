@@ -43,7 +43,7 @@ public class Protector extends TownPlayer {
 		}
 		
 		if (simulation.getPrioritizedNightkills().size() > 0) {
-			visiting = Simulation.randomIn(simulation.getPrioritizedNightkills());
+			Simulation.randomIn(simulation.getPrioritizedNightkills()).visitFrom(this);
 			simulation.storyLog(this + " knows mafia's after " + visiting + " and protected them.");
 		} else {
 			double roll = Math.random();

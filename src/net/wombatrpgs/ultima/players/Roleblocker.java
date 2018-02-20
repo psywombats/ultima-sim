@@ -33,7 +33,7 @@ public class Roleblocker extends MafiaPlayer {
 			return;
 		}
 		
-		visiting = Simulation.randomIn(simulation.getTown());
+		Simulation.randomIn(simulation.getTown()).visitFrom(this);
 		visiting.nullify();
 		simulation.storyLog(this + " blocked " + visiting + ".");
 	}

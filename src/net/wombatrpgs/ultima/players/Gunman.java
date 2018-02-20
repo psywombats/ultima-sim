@@ -59,7 +59,7 @@ public class Gunman extends TownPlayer {
 		}
 		
 		if (simulation.getPrioritizedDaykills().size() > 0) {
-			visiting = Simulation.randomIn(simulation.getPrioritizedNightkills());
+			Simulation.randomIn(simulation.getPrioritizedNightkills()).visitFrom(this);
 			simulation.storyLog(this + " thinks " + visiting + " is scum and targetted them.");
 		} else {
 			visiting = Simulation.randomIn(simulation.getPlayers());

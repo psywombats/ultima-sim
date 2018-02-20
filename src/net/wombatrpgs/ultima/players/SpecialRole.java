@@ -25,6 +25,7 @@ public enum SpecialRole {
 	GUNMAN			("gunman"),
 	DETECTIVE		("detective"),
 	TRACKER			("tracker"),
+	PARANOIAC		("paranoiac"),
 	LOVER			("lover");
 	
 	private String displayName;

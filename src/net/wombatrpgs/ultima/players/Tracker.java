@@ -76,7 +76,7 @@ public class Tracker extends TownPlayer {
 			return;
 		}
 		
-		visiting = Simulation.randomIn(toInvestigate());
+		Simulation.randomIn(toInvestigate()).visitFrom(this);
 		
 		if (visiting == null) {
 			simulation.storyLog(this + " found nobody to follow.");

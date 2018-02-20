@@ -148,6 +148,14 @@ public abstract class Player {
 	}
 	
 	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return friendlyName();
+	}
+	
+	/**
 	 * Whoops. Kills this player from the sim.
 	 */
 	protected void die() {
@@ -156,11 +164,11 @@ public abstract class Player {
 	}
 	
 	/**
-	 * @see java.lang.Object#toString()
+	 * Never set your visit ivar directly.
+	 * @param visitor
 	 */
-	@Override
-	public String toString() {
-		return friendlyName();
+	protected void visitFrom(Player visitor) {
+		visitor.visiting = this;
 	}
 	
 	/** @return The user-facing name for this player, usually their role name */
