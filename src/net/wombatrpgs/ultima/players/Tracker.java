@@ -16,7 +16,7 @@ import net.wombatrpgs.ultima.Simulation;
 public class Tracker extends TownPlayer {
 	
 	// when the tracker has info on some percent of remaining players, they role claim
-	private static final float INVESTIGATION_PERCENT_BEFORE_CLAIM = 0.65f;
+	private static final float INVESTIGATION_PERCENT_BEFORE_CLAIM = 0.5f;
 	
 	protected HashSet<Player> seenMoving;
 	protected HashSet<Player> seenStill;
@@ -43,7 +43,7 @@ public class Tracker extends TownPlayer {
 		}
 		
 		Player visited = visiting.visiting;
-		if (visited != null && !visited.isAlive()) {
+		if (visited != null && !visited.isAlive() && visiting.isAlive()) {
 			simulation.storyLog(this + " saw " + visiting + " at a corpse and claimed.");
 			claim(true);
 			return;

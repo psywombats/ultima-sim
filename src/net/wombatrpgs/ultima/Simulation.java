@@ -118,10 +118,15 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.SMITH) && !isAlive(SpecialRole.SMITH)) {
 				townie = new Smith(this);
 				specialists.put(SpecialRole.SMITH, townie);
-			} else if (rules.enabledRoles.get(SpecialRole.PROTECTOR) && specialCount(SpecialRole.PROTECTOR) < Protector.getQuantity()) {
+			} else if (rules.enabledRoles.get(SpecialRole.PROTECTOR) && 
+					getAllPlayersWithRole(SpecialRole.PROTECTOR).size() < Protector.getQuantity()) {
 				townie = new Protector(this);
-			} else if (rules.enabledRoles.get(SpecialRole.GUNMAN) && specialCount(SpecialRole.GUNMAN) < Gunman.getQuantity()) {
+			} else if (rules.enabledRoles.get(SpecialRole.GUNMAN) && 
+					getAllPlayersWithRole(SpecialRole.GUNMAN).size() < Gunman.getQuantity()) {
 				townie = new Gunman(this);
+			} else if (rules.enabledRoles.get(SpecialRole.LOVER) && 
+					getAllPlayersWithRole(SpecialRole.LOVER).size() < Lover.getQuantity()) {
+				townie = new Lover(this);
 			} else if (rules.enabledRoles.get(SpecialRole.INNOCENT) && !isAlive(SpecialRole.INNOCENT)) {
 				townie = new TownPlayer(this);
 				specialists.put(SpecialRole.INNOCENT, townie);
@@ -285,6 +290,21 @@ public class Simulation {
 	}
 	
 	/**
+	 * Finds all living players with the given role.
+	 * @param	role			The role to check for
+	 * @return					A set of all players with that role
+	 */
+	public Set<Player> getAllPlayersWithRole(SpecialRole role) {
+		HashSet<Player> found = new HashSet<>();
+		for (Player player : players) {
+			if (player.getRole() == role) {
+				found.add(player);
+			}
+		}
+		return found;
+	}
+	
+	/**
 	 * Determines who the mafia should kill
 	 * @param 	inflicter		The mafioso doing the dirty work
 	 * @return					The poor slob to nightkill
@@ -349,21 +369,6 @@ public class Simulation {
 		} else {
 			return null;
 		}
-	}
-	
-	/**
-	 * Checks the number of living players with the given role.
-	 * @param	role			The role to check for
-	 * @return					The number of living players with that role
-	 */
-	private int specialCount(SpecialRole role) {
-		int count = 0;
-		for (Player player : players) {
-			if (player.getRole() == role) {
-				count += 1;
-			}
-		}
-		return count;
 	}
 	
 	/**

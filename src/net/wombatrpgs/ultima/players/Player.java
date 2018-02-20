@@ -81,6 +81,10 @@ public abstract class Player {
 	 */
 	public void attemptNightkill(Player inflicter, boolean ignoresProtection) {
 		inflicter.visiting = this;
+		if (!isAlive()) {
+			simulation.storyLog("...but " + this + " was already dead.");
+			return;
+		}
 		if (isDoctorProtected && !ignoresProtection) {
 			simulation.storyLog("...but " + this + " was protected!");
 			simulation.onPlayerProtected(this);
