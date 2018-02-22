@@ -121,6 +121,9 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.PARANOIAC) && !isAlive(SpecialRole.PARANOIAC)) {
 				townie = new Paranoiac(this);
 				specialists.put(SpecialRole.PARANOIAC, townie);
+			} else if (rules.enabledRoles.get(SpecialRole.VENGEFUL) && !isAlive(SpecialRole.VENGEFUL)) {
+				townie = new Vengeful(this);
+				specialists.put(SpecialRole.VENGEFUL, townie);
 			} else if (rules.enabledRoles.get(SpecialRole.PROTECTOR) && 
 					getAllPlayersWithRole(SpecialRole.PROTECTOR).size() < Protector.getQuantity()) {
 				townie = new Protector(this);

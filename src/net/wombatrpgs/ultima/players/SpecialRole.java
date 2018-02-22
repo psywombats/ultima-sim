@@ -26,6 +26,7 @@ public enum SpecialRole {
 	DETECTIVE		("detective"),
 	TRACKER			("tracker"),
 	PARANOIAC		("paranoiac"),
+	VENGEFUL		("vengeful"),
 	LOVER			("lover");
 	
 	private String displayName;
