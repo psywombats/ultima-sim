@@ -29,9 +29,9 @@ public class Roleblocker extends MafiaPlayer {
 		super.onPostDaykill();
 		
 		// the "umineko rule"
-		if (simulation.getMafia().size() == 1) {
-			return;
-		}
+//		if (simulation.getMafia().size() == 1) {
+//			return;
+//		}
 		
 		Simulation.randomIn(simulation.getTown()).visitFrom(this);
 		visiting.nullify();

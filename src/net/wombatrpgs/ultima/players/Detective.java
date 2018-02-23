@@ -7,6 +7,7 @@
 package net.wombatrpgs.ultima.players;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import net.wombatrpgs.ultima.Simulation;
 
@@ -80,6 +81,13 @@ public class Detective extends TownPlayer {
 				simulation.storyLog(this + " roleclaimed to implicate " + target + ".");
 				simulation.prioritizeDaykill(target);
 				simulation.prioritizeNightkill(this);
+				
+				for (Player player : simulation.getMafia()) {
+					Random rand = new Random();
+					if (player != target && rand.nextBoolean()) {
+						simulation.storyLog(this + " managed to also nail the other scum " + target + ".");
+					}
+				}
 			}
 		}
 		

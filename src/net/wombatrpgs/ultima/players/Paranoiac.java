@@ -7,6 +7,7 @@
 package net.wombatrpgs.ultima.players;
 
 import java.util.HashSet;
+import java.util.Random;
 
 import net.wombatrpgs.ultima.Simulation;
 
@@ -89,8 +90,11 @@ public class Paranoiac extends TownPlayer {
 		if (ignoresProtection || inflicter != suspect) {
 			super.attemptNightkill(inflicter, ignoresProtection);
 		} else {
-			simulation.storyLog("...but " + this + " was expecting " + inflicter + "! REVENGE!");
-			inflicter.attemptNightkill(this, false);
+//			simulation.storyLog("...but " + this + " was expecting " + inflicter + "! REVENGE!");
+//			inflicter.attemptNightkill(this, false);
+			simulation.storyLog("...but " + this + " was expecting company!");
+			simulation.prioritizeNightkill(this);
+			simulation.prioritizeDaykill(inflicter);
 		}
 	}
 
