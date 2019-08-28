@@ -22,6 +22,9 @@ public class GameRules {
 	/** The number of players that are mafiosi */
 	public int mafiaCount;
 	
+	/** The number of "critical" players that can't all die */
+	public int agentCount;
+	
 	/** Is the special role enabled? */
 	public Map<SpecialRole, Boolean> enabledRoles;
 	
@@ -37,5 +40,4 @@ public class GameRules {
 			enabledRoles.put(role, false);
 		}
 	}
-
 }

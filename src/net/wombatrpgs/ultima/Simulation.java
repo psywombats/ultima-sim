@@ -30,6 +30,7 @@ public class Simulation {
 	private Set<TownPlayer> town;
 	private Set<Player> serialKillers;
 	private Set<Player> jokers;
+	private Set<Agent> agents;
 	private Map<SpecialRole, Player> specialists;
 	
 	private Set<Player> prioritizedNightkillPlayers;
@@ -54,6 +55,7 @@ public class Simulation {
 		town = new HashSet<TownPlayer>();
 		serialKillers = new HashSet<Player>();
 		jokers = new HashSet<Player>();
+		agents = new HashSet<Agent>();
 		specialists = new HashMap<SpecialRole, Player>();
 		
 		prioritizedNightkillPlayers = new HashSet<Player>();
@@ -99,6 +101,13 @@ public class Simulation {
 			}
 			mafia.add(mafioso);
 			players.add(mafioso);
+		}
+		
+		for (int i = 0; i < rules.agentCount; i += 1) {
+			Agent agent = new Agent(this);
+			players.add(agent);
+			town.add(agent);
+			agents.add(agent);
 		}
 		
 		while (players.size() < rules.playerCount) {
@@ -213,6 +222,7 @@ public class Simulation {
 		players.remove(player);
 		if (mafia.contains(player)) mafia.remove(player);
 		if (town.contains(player)) town.remove(player);
+		if (agents.contains(player)) agents.remove(player);
 		if (prioritizedDaykillPlayers.contains(player)) prioritizedDaykillPlayers.remove(player);
 		if (prioritizedNightkillPlayers.contains(player)) prioritizedNightkillPlayers.remove(player);
 		if (exoneratedPlayers.contains(player)) exoneratedPlayers.remove(player);
@@ -372,6 +382,9 @@ public class Simulation {
 		} else if (serialKillers.size() > 0 && players.size() == serialKillers.size()) {
 			storyLog("Everyone's dead but the killer. SK WIN.\n\n");
 			return new SimulationResult(Faction.SK, turnCount, isNight);
+		} else if (agents.size() == 0 && rules.agentCount > 0) {
+			storyLog("Agents are dead. MAFIA WIN.\n\n");
+			return new SimulationResult(Faction.MAFIA, turnCount, isNight);
 		} else {
 			return null;
 		}

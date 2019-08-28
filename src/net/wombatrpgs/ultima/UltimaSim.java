@@ -32,15 +32,16 @@ public class UltimaSim {
 		GameRules rules = new GameRules();
 		rules.playerCount = 12;
 		rules.mafiaCount = 2;
-		rules.enabledRoles.put(SpecialRole.DETECTIVE, true);
-		rules.enabledRoles.put(SpecialRole.ROLEBLOCKER, true);
-		rules.enabledRoles.put(SpecialRole.PROTECTOR, true);
-		rules.enabledRoles.put(SpecialRole.GUNMAN, true);
-		rules.enabledRoles.put(SpecialRole.TRACKER, true);
-		rules.enabledRoles.put(SpecialRole.LOVER, true);
-		rules.enabledRoles.put(SpecialRole.PARANOIAC, true);
+		rules.agentCount = 2;
+//		rules.enabledRoles.put(SpecialRole.DETECTIVE, true);
+//		rules.enabledRoles.put(SpecialRole.ROLEBLOCKER, true);
+//		rules.enabledRoles.put(SpecialRole.PROTECTOR, true);
+//		rules.enabledRoles.put(SpecialRole.GUNMAN, true);
+//		rules.enabledRoles.put(SpecialRole.TRACKER, true);
+//		rules.enabledRoles.put(SpecialRole.LOVER, true);
+//		rules.enabledRoles.put(SpecialRole.PARANOIAC, true);
 //		rules.enabledRoles.put(SpecialRole.VENGEFUL, true);
-		rules.majorityVotesOnly = true;
+		rules.majorityVotesOnly = false;
 		
 		for (int i = 0; i < iterations; i += 1) {
 			Simulation simulation = new Simulation(rules);
