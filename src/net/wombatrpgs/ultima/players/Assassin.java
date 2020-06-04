@@ -35,15 +35,9 @@ public class Assassin extends MafiaPlayer {
 			return;
 		}
 		
-		// there is a doctor protecting some claimed role, let's take 'em out
-		if (simulation.isAlive(SpecialRole.DOCTOR) && simulation.getPrioritizedNightkills().size() > 0) {
+		// there is a claimed role, let's take 'em out
+		if (simulation.getPrioritizedNightkills().size() > 0) {
 			assassinate(Simulation.randomIn(simulation.getPrioritizedNightkills()));
-			return;
-		}
-		
-		// good chance the doctor was protected himself! idiot
-		if (simulation.getOnceProtected().size() > 0) {
-			assassinate(Simulation.randomIn(simulation.getOnceProtected()));
 			return;
 		}
 		
@@ -61,7 +55,17 @@ public class Assassin extends MafiaPlayer {
 	 */
 	private void assassinate(Player victim) {
 		// hack, skip a wounded victim
+		simulation.storyLog("The assassin used there power to defeat any doc protection.");
 		simulation.enhanceNightkill();
 		simulation.deregisterSpecial(SpecialRole.ASSASSIN);
 	}
+
+	/**
+	 * @see net.wombatrpgs.ultima.players.MafiaPlayer#friendlyName()
+	 */
+	@Override
+	protected String friendlyName() {
+		return "the assassin";
+	}
+	
 }

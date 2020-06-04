@@ -29,7 +29,7 @@ public class GameRules {
 	public Map<SpecialRole, Boolean> enabledRoles;
 	
 	/** Town can lynch by majority vote and else votes nobody */
-	public boolean majorityVotesOnly;
+	public boolean majorityVotesOnly = true;
 	
 	/**
 	 * Initializes an empty ruleset. Set via properties.

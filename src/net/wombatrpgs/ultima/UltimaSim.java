@@ -20,7 +20,7 @@ import net.wombatrpgs.ultima.rules.GameRules;
  */
 public class UltimaSim {
 	
-	private static int iterations = 1000;
+	private static int iterations = 50000;
 
 	/**
 	 * Entry point.
@@ -30,17 +30,11 @@ public class UltimaSim {
 		List<SimulationResult> results = new ArrayList<SimulationResult>();
 		
 		GameRules rules = new GameRules();
-		rules.playerCount = 12;
+		rules.playerCount = 11;
 		rules.mafiaCount = 2;
-		rules.agentCount = 2;
-//		rules.enabledRoles.put(SpecialRole.DETECTIVE, true);
-//		rules.enabledRoles.put(SpecialRole.ROLEBLOCKER, true);
-//		rules.enabledRoles.put(SpecialRole.PROTECTOR, true);
-//		rules.enabledRoles.put(SpecialRole.GUNMAN, true);
-//		rules.enabledRoles.put(SpecialRole.TRACKER, true);
-//		rules.enabledRoles.put(SpecialRole.LOVER, true);
-//		rules.enabledRoles.put(SpecialRole.PARANOIAC, true);
-//		rules.enabledRoles.put(SpecialRole.VENGEFUL, true);
+		rules.enabledRoles.put(SpecialRole.DOCTOR_NO_DOUBLES, true);
+		rules.enabledRoles.put(SpecialRole.PARITY_COP, true);
+		rules.enabledRoles.put(SpecialRole.ASSASSIN, true);
 		rules.majorityVotesOnly = false;
 		
 		for (int i = 0; i < iterations; i += 1) {

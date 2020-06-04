@@ -7,7 +7,6 @@
 package net.wombatrpgs.ultima.players;
 
 import java.util.HashSet;
-import java.util.Random;
 
 import net.wombatrpgs.ultima.Simulation;
 

@@ -23,6 +23,9 @@ import net.wombatrpgs.ultima.rules.GameRules;
  */
 public class Simulation {
 	
+	// if certain survive to this day, claim to provide info; otherwise no-kill
+	public static int CLAIM_DAY = -1;
+	
 	private static Random rand = new Random();
 	
 	private Set<Player> players;
@@ -142,6 +145,12 @@ public class Simulation {
 			} else if (rules.enabledRoles.get(SpecialRole.LOVER) && 
 					getAllPlayersWithRole(SpecialRole.LOVER).size() < Lover.getQuantity()) {
 				townie = new Lover(this);
+			} else if (rules.enabledRoles.get(SpecialRole.DOCTOR_NO_DOUBLES) && 
+					getAllPlayersWithRole(SpecialRole.DOCTOR_NO_DOUBLES).size() < 1) {
+				townie = new DoctorNoDoubles(this);
+			} else if (rules.enabledRoles.get(SpecialRole.PARITY_COP) && 
+					getAllPlayersWithRole(SpecialRole.PARITY_COP).size() < 1) {
+				townie = new ParityCop(this);
 			} else if (rules.enabledRoles.get(SpecialRole.INNOCENT) && !isAlive(SpecialRole.INNOCENT)) {
 				townie = new TownPlayer(this);
 				specialists.put(SpecialRole.INNOCENT, townie);
@@ -195,6 +204,9 @@ public class Simulation {
 	
 	/** Turns on verbose logging for what happens during the game */
 	public void setDebugOn() { this.debugLog = true; }
+	
+	/** @return the zero-indexed turn count */
+	public int getDay() { return this.turnCount; }
 	
 	/**
 	 * Simulates the full run of the game.
@@ -261,7 +273,6 @@ public class Simulation {
 	 */
 	public void exoneratePlayer(Player player) {
 		exoneratedPlayers.add(player);
-		prioritizedDaykillPlayers.remove(player);
 	}
 	
 	/**
@@ -275,6 +286,11 @@ public class Simulation {
 	
 	/**@return The player that town chooses to daykill next */
 	public Player getDaykillTarget() {
+		if (getDay() < CLAIM_DAY) {
+			storyLog("Town no-lynched because they were waiting for cops or something");
+			return null;
+		}
+		
 		if (rules.majorityVotesOnly && (float)mafia.size() >= ((float)players.size()) / 2.0f) {
 			storyLog("The mafia stalemated the vote and no one was lynched.");
 			return null;
@@ -282,7 +298,7 @@ public class Simulation {
 		
 		if (prioritizedDaykillPlayers.size() > 0) {
 			Player result = randomIn(prioritizedDaykillPlayers);
-			storyLog("Town had strong reason to believe " + result + " was scum and lynched him.");
+			storyLog("Town had strong reason to believe " + result + " was scum and lynched them.");
 			return result;
 		}
 		
