@@ -46,6 +46,16 @@ public class ParityCop extends TownPlayer {
 		for (Player deadPlayer : deadPlayers) {
 			investigatedPlayers.remove(deadPlayer);
 		}
+		
+		deadPlayers.clear();
+		for (Player player : misidentifiedPlayers) {
+			if (!player.isAlive()) {
+				deadPlayers.add(player);
+			}
+		}
+		for (Player deadPlayer : deadPlayers) {
+			misidentifiedPlayers.remove(deadPlayer);
+		}
 
 		// don't investigate duplicates
 		ArrayList<Player> toInvestigate = new ArrayList<Player>(simulation.getPlayers());
@@ -72,6 +82,10 @@ public class ParityCop extends TownPlayer {
 				// oops, this is the scumteam, town is hosed
 				misidentifiedPlayers.add(player1);
 				misidentifiedPlayers.add(player2);
+			} else if (player1.getFaction() == Faction.MAFIA) {
+				misidentifiedPlayers.add(player2);
+			} else if (player2.getFaction() == Faction.MAFIA) {
+				misidentifiedPlayers.add(player1);
 			}
 		}
 		
@@ -96,6 +110,9 @@ public class ParityCop extends TownPlayer {
 			simulation.exoneratePlayer(this);
 			
 			for (Player player : investigatedPlayers) {
+				if (!player.isAlive()) {
+					continue;
+				}
 				if (player.getFaction() == Faction.MAFIA) {
 					if (misidentifiedPlayers.contains(player)) {
 						simulation.exoneratePlayer(player);
